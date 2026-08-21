@@ -12,7 +12,8 @@
   "dependencies": {
     "lucide-react": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "utif": "^3.1.0"
   },
   "devDependencies": {
     "@types/react": "latest",

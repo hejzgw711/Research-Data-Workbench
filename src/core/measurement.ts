@@ -1,7 +1,7 @@
 export type ImageKind = 'target' | 'loading'
 export type Polarity = 'dark' | 'bright'
 
-export interface ImageDocument { fileName: string; width: number; height: number; bitDepth: 8; channel: string; source: 'demo' | 'upload'; pixels: Uint8Array }
+export interface ImageDocument { fileName: string; width: number; height: number; bitDepth: 8 | 16; channel: string; source: 'demo' | 'upload'; pixels: Uint8Array | Uint16Array }
 export interface Rect { x: number; y: number; width: number; height: number }
 export interface LaneAssignment { id: string; index: number; targetRect: Rect; loadingRect: Rect; sample: string; group: string; replicate: string }
 export interface PixelStats { area: number; meanGray: number; minGray: number; maxGray: number; rawIntDen: number; saturated: number }
@@ -12,15 +12,17 @@ export function measureRect(image: ImageDocument | null, rect: Rect | null): Pix
   if (!image || !rect) return null
   const x0 = Math.max(0, Math.min(image.width, Math.floor(rect.x))); const y0 = Math.max(0, Math.min(image.height, Math.floor(rect.y)))
   const x1 = Math.max(x0, Math.min(image.width, Math.ceil(rect.x + rect.width))); const y1 = Math.max(y0, Math.min(image.height, Math.ceil(rect.y + rect.height)))
-  let count = 0; let sum = 0; let min = 255; let max = 0; let saturated = 0
-  for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) { const value = image.pixels[y * image.width + x]; count += 1; sum += value; min = Math.min(min, value); max = Math.max(max, value); if (value === 0 || value === 255) saturated += 1 }
+  const saturationMax = image.bitDepth === 16 ? 65535 : 255
+  let count = 0; let sum = 0; let min = saturationMax; let max = 0; let saturated = 0
+  for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) { const value = image.pixels[y * image.width + x]; count += 1; sum += value; min = Math.min(min, value); max = Math.max(max, value); if (value === 0 || value === saturationMax) saturated += 1 }
   const meanGray = count ? sum / count : 0
   return { area: count, meanGray, minGray: count ? min : 0, maxGray: count ? max : 0, rawIntDen: count * meanGray, saturated }
 }
 
 function smoothedProfile(image: ImageDocument, region: Rect, polarity: Polarity) {
   const profile = Array.from({ length: Math.max(1, Math.ceil(region.width)) }, () => 0)
-  for (let x = 0; x < profile.length; x += 1) { const stats = measureRect(image, { x: region.x + x, y: region.y, width: 1, height: region.height }); profile[x] = stats ? polarity === 'dark' ? 255 - stats.meanGray : stats.meanGray : 0 }
+  const maxGray = image.bitDepth === 16 ? 65535 : 255
+  for (let x = 0; x < profile.length; x += 1) { const stats = measureRect(image, { x: region.x + x, y: region.y, width: 1, height: region.height }); profile[x] = stats ? polarity === 'dark' ? maxGray - stats.meanGray : stats.meanGray : 0 }
   return profile.map((_, index) => { const start = Math.max(0, index - 3); const end = Math.min(profile.length, index + 4); return profile.slice(start, end).reduce((sum, value) => sum + value, 0) / (end - start) })
 }
 
@@ -66,6 +68,26 @@ export function summarizeByGroup(measurements: PairMeasurement[], field: 'normal
     const sd = values.length > 1 ? Math.sqrt(values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (values.length - 1)) : 0
     return { group, values, n: values.length, mean, sd, sem: values.length > 1 ? sd / Math.sqrt(values.length) : null }
   })
+}
+
+export function rotateImageData(image: ImageDocument, angleDeg: number, center: { x: number; y: number }): ImageDocument {
+  const radians = angleDeg * Math.PI / 180
+  const cos = Math.cos(radians); const sin = Math.sin(radians)
+  const pixels = image.bitDepth === 16 ? new Uint16Array(image.width * image.height) : new Uint8Array(image.width * image.height)
+  for (let y = 0; y < image.height; y += 1) {
+    for (let x = 0; x < image.width; x += 1) {
+      const dx = x - center.x; const dy = y - center.y
+      const sx = center.x + dx * cos + dy * sin
+      const sy = center.y - dx * sin + dy * cos
+      const x0 = Math.max(0, Math.min(image.width - 1, Math.floor(sx))); const y0 = Math.max(0, Math.min(image.height - 1, Math.floor(sy)))
+      const x1 = Math.min(image.width - 1, x0 + 1); const y1 = Math.min(image.height - 1, y0 + 1)
+      const fx = Math.max(0, Math.min(1, sx - x0)); const fy = Math.max(0, Math.min(1, sy - y0))
+      const a = image.pixels[y0 * image.width + x0]; const b = image.pixels[y0 * image.width + x1]; const c = image.pixels[y1 * image.width + x0]; const d = image.pixels[y1 * image.width + x1]
+      const value = a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + c * (1 - fx) * fy + d * fx * fy
+      pixels[y * image.width + x] = Math.round(value)
+    }
+  }
+  return { ...image, pixels }
 }
 
 export function makeDemoPair() {

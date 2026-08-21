@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculatePairMeasurements, detectLaneRects, measureRect, summarizeByGroup, type ImageDocument, type LaneAssignment, type PairMeasurement } from './measurement'
+import { calculatePairMeasurements, detectLaneRects, measureRect, rotateImageData, summarizeByGroup, type ImageDocument, type LaneAssignment, type PairMeasurement } from './measurement'
 
 const image: ImageDocument = { fileName: 'fixture.png', width: 4, height: 2, bitDepth: 8, channel: '灰度亮度', source: 'demo', pixels: new Uint8Array([200, 200, 200, 200, 100, 100, 200, 200]) }
 const lane: LaneAssignment = { id: 'lane-1', index: 1, targetRect: { x: 0, y: 1, width: 2, height: 1 }, loadingRect: { x: 0, y: 1, width: 2, height: 1 }, sample: 'S1', group: 'Control', replicate: '1' }
@@ -21,5 +21,16 @@ describe('WB paired image measurement', () => {
     expect(summaries[1].mean).toBeCloseTo(7 / 3, 6)
     expect(summaries[1].sd).toBeCloseTo(0.305505, 4)
     expect(summaries[1].sem).toBeCloseTo(0.176383, 4)
+  })
+  it('rotates by 0 degrees without changing pixels', () => {
+    const rotated = rotateImageData(image, 0, { x: 2, y: 1 })
+    expect(Array.from(rotated.pixels)).toEqual(Array.from(image.pixels))
+  })
+  it('rotates 16-bit grayscale while preserving bit depth', () => {
+    const sixteenBit: ImageDocument = { fileName: 'fixture16.tif', width: 3, height: 1, bitDepth: 16, channel: '灰度亮度', source: 'upload', pixels: new Uint16Array([1000, 2000, 3000]) }
+    const rotated = rotateImageData(sixteenBit, 180, { x: 1, y: .5 })
+    expect(rotated.bitDepth).toBe(16)
+    expect(rotated.pixels).toBeInstanceOf(Uint16Array)
+    expect(Array.from(rotated.pixels)).toEqual([3000, 2000, 1000])
   })
 })
