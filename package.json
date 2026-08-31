@@ -13,7 +13,10 @@
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "utif": "^3.1.0"
+    "utif": "^3.1.0",
+    "echarts": "latest",
+    "echarts-for-react": "latest",
+    "jszip": "latest"
   },
   "devDependencies": {
     "@types/react": "latest",

@@ -3,5 +3,6 @@ dist/
 test-results/
 *.log
 *.tsbuildinfo
+tests/
 vite.config.js
 vite.config.d.ts

@@ -27,3 +27,36 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .control-panel { display: flex; flex-direction: column; }.control-section { padding: 14px; border-bottom: 1px solid var(--border); }.control-section:last-child { border-bottom: 0; }.field { display: flex; flex-direction: column; gap: 5px; margin-top: 13px; color: var(--muted); font-size: 10px; }.field small { color: #6f8b86; line-height: 1.35; }input, select { width: 100%; min-width: 0; height: 35px; padding: 0 10px; outline: 0; border: 1px solid var(--border); border-radius: 6px; color: var(--text); background: var(--surface-2); }input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(98,211,194,.1); }.lane-editor { display: flex; flex-direction: column; gap: 6px; margin-top: 13px; max-height: 305px; overflow-y: auto; }.lane-row { display: grid; grid-template-columns: 25px 1fr 1fr 55px; gap: 5px; align-items: center; }.lane-row input { height: 31px; padding: 0 7px; font-size: 9px; }.lane-index { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 4px; color: #092522; background: var(--accent); font-size: 10px; font-weight: 800; }.group-preview { margin-top: 13px; }.group-svg { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; background: #0b2926; }.group-chart-footer { min-height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 9px; }.group-preview .result-table { margin-top: 8px; }.empty-state { padding: 15px 10px; border: 1px dashed var(--border); color: var(--muted); font-size: 10px; line-height: 1.5; text-align: center; }.qc-box { margin-top: 13px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); }.qc-box > div { display: flex; align-items: center; gap: 7px; color: var(--accent); font-size: 11px; }.qc-box small { display: block; margin-top: 7px; color: var(--muted); font-size: 9px; line-height: 1.4; }
 .results-panel { margin-top: 14px; }.result-actions { display: flex; gap: 6px; }.result-block { border-top: 1px solid var(--border); }.result-block > header { min-height: 38px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: var(--accent); font-size: 11px; }.copy-button { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border: 0; color: var(--muted); background: transparent; font-size: 9px; }.copy-button:hover { color: var(--text); background: var(--surface-3); }.result-table-wrap { overflow: auto; }.result-table { width: 100%; border-collapse: collapse; font-size: 10px; }.result-table th, .result-table td { min-width: 95px; padding: 7px 10px; border-top: 1px solid #163f3a; text-align: right; white-space: nowrap; }.result-table th { color: var(--muted); background: #0b2926; font-size: 9px; }.result-table th:first-child, .result-table td:first-child { min-width: 130px; text-align: left; }footer { padding: 26px 3px 26px; color: var(--muted); font-size: 9px; line-height: 1.45; }.toast { position: fixed; right: 24px; bottom: 24px; z-index: 20; max-width: 460px; padding: 12px 15px; border: 1px solid var(--accent-dark); border-radius: 7px; color: #082b26; background: var(--accent); box-shadow: 0 15px 35px rgba(0,0,0,.28); font-size: 11px; font-weight: 750; cursor: pointer; }
 @media (max-width: 1380px) { .app { padding: 11px; }.topbar { padding: 13px 15px; }.brand h1 { font-size: 20px; }.button { padding: 0 10px; }.workspace { grid-template-columns: minmax(0, var(--split-left, 1.08fr)) 7px minmax(0, var(--split-right, 1fr)); gap: 0; } }
+
+.combined-shell { min-height: 100vh; position: relative; background: #071817; }
+.combined-switcher { position: absolute; top: 128px; left: 32px; z-index: 8; display: flex; gap: 7px; }
+.combined-switcher button { min-height: 42px; padding: 0 17px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid #1b4c46; border-radius: 6px; color: #8da7a3; background: #092522; font-size: 12px; font-weight: 750; }
+.combined-switcher button:hover { color: #e6efee; border-color: #62d3c2; }
+.combined-switcher button.active { color: #062a25; border-color: #62d3c2; background: #62d3c2; }
+.combined-shell.wb-mode .app > .tabs { visibility: hidden; }
+.combined-shell.wb-mode .app > .topbar .brand h1 { font-size: 0; }
+.combined-shell.wb-mode .app > .topbar .brand h1::after { content: 'WB / SPR 科研数据工作台'; font-size: 24px; }
+.combined-shell.wb-mode .app > .topbar .brand .eyebrow { font-size: 0; }
+.combined-shell.wb-mode .app > .topbar .brand .eyebrow::after { content: 'RESEARCH DATA STUDIO'; font-size: 10px; }
+.combined-shell.wb-mode .app > .topbar .brand p { font-size: 0; }
+.combined-shell.wb-mode .app > .topbar .brand p::after { content: 'Western Blot 灰度测量与 SPR 合成数据生成'; font-size: 11px; }
+.combined-shell.spr-mode-active { background: #edf3f1; }
+.combined-shell.spr-mode-active .combined-switcher { top: 99px; left: 32px; }
+.combined-shell.spr-mode-active .combined-switcher button { color: #61716e; border-color: #c9d8d4; background: #ffffff; }
+.combined-shell.spr-mode-active .combined-switcher button:hover { border-color: #238a73; color: #176a59; }
+.combined-shell.spr-mode-active .combined-switcher button.active { color: #ffffff; border-color: #177f6b; background: #177f6b; }
+.combined-shell.spr-mode-active .spr-mode .topbar { padding-right: 32px; }
+.combined-shell.spr-mode-active .spr-mode .workspace { padding-top: 48px; }
+.combined-shell.spr-mode-active .spr-mode .brand { min-width: 0; }
+.combined-shell.spr-mode-active .spr-mode .brand strong { max-width: 100%; overflow-wrap: anywhere; }
+
+@media (max-width: 760px) {
+  body:has(.combined-shell.spr-mode-active) { min-width: 320px; }
+  .combined-switcher { top: 111px; left: 16px; }
+  .combined-switcher button { min-height: 36px; padding: 0 10px; font-size: 11px; }
+  .combined-shell.spr-mode-active .combined-switcher { top: 91px; left: 16px; }
+  .combined-shell.spr-mode-active .spr-mode .topbar { padding: 14px 16px; }
+  .combined-shell.spr-mode-active .spr-mode .brand strong { font-size: 16px; }
+  .combined-shell.spr-mode-active .spr-mode .brand small { font-size: 9px; }
+  .combined-shell.spr-mode-active .spr-mode .top-status { padding: 6px 8px; font-size: 10px; }
+}
