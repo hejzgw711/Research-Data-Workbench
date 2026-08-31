@@ -87,6 +87,9 @@ button {
   color: #c7d5d3;
   font-size: 12px;
 }
+.spr-top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.spr-logout-button { min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid #c9d8d4; border-radius: 6px; color: #52635f; background: #ffffff; font-size: 11px; font-weight: 750; }
+.spr-logout-button:hover { border-color: #177f6b; color: #176a59; }
 
 .top-status svg,
 .ready-indicator svg {

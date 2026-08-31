@@ -8,6 +8,7 @@ import {
   Download,
   FileArchive,
   FlaskConical,
+  LogOut,
   Play,
   RefreshCw,
   Settings2,
@@ -104,7 +105,7 @@ function DataPreview({ headers, rows }: { headers: string[]; rows: Array<Array<s
   )
 }
 
-export default function App() {
+export default function App({ onLogout }: { onLogout?: () => void }) {
   const [draft, setDraft] = useState<SimulationSettings>(defaultSettings)
   const [result, setResult] = useState<SimulationResult>(() => simulateExperiment(defaultSettings))
   const [activeTab, setActiveTab] = useState<TabKey>('chart')
@@ -159,7 +160,7 @@ export default function App() {
             <small>SPR SYNTHETIC SENSORGRAM GENERATOR</small>
           </div>
         </div>
-        <div className="top-status"><Sparkles size={15} /> Seed {result.settings.seed}</div>
+        <div className="spr-top-actions"><div className="top-status"><Sparkles size={15} /> Seed {result.settings.seed}</div>{onLogout && <button className="spr-logout-button" onClick={onLogout}><LogOut size={15} />退出登录</button>}</div>
       </header>
 
       <main className="workspace">
