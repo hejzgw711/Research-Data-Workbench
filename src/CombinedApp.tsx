@@ -23,7 +23,10 @@ export default function CombinedApp() {
   return (
     <div className={`combined-shell ${mode === 'wb' ? 'wb-mode' : 'spr-mode-active'}`}>
       <ModeSwitcher mode={mode} onChange={setMode} />
-      <div className="mode-content">{mode === 'wb' ? <WbApp /> : <SprApp />}</div>
+      <div className="mode-content">
+        <div className={`wb-stage ${mode === 'wb' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'wb'}><WbApp /></div>
+        <div className={`spr-stage ${mode === 'spr' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'spr'}><SprApp /></div>
+      </div>
     </div>
   )
 }

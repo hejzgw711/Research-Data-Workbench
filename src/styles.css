@@ -29,6 +29,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 @media (max-width: 1380px) { .app { padding: 11px; }.topbar { padding: 13px 15px; }.brand h1 { font-size: 20px; }.button { padding: 0 10px; }.workspace { grid-template-columns: minmax(0, var(--split-left, 1.08fr)) 7px minmax(0, var(--split-right, 1fr)); gap: 0; } }
 
 .combined-shell { min-height: 100vh; position: relative; background: #071817; }
+.mode-content > .is-hidden { display: none; }
+.mode-content > .is-visible { display: block; }
 .combined-switcher { position: absolute; top: 128px; left: 32px; z-index: 8; display: flex; gap: 7px; }
 .combined-switcher button { min-height: 42px; padding: 0 17px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid #1b4c46; border-radius: 6px; color: #8da7a3; background: #092522; font-size: 12px; font-weight: 750; }
 .combined-switcher button:hover { color: #e6efee; border-color: #62d3c2; }
