@@ -155,7 +155,7 @@ export default function App() {
         <div className="brand">
           <span className="brand-mark"><FlaskConical aria-hidden="true" /></span>
           <div>
-            <strong>WB / SPR 科研数据工作台</strong>
+            <strong>生成可分析科研数据工作台</strong>
             <small>SPR SYNTHETIC SENSORGRAM GENERATOR</small>
           </div>
         </div>
@@ -384,7 +384,7 @@ export default function App() {
       </main>
 
       <footer>
-        <span>SPR Synthetic Data Studio · 所有计算均在当前浏览器内完成</span>
+        <span>生成可分析科研数据工作台 · 所有计算均在当前浏览器内完成</span>
         <span>合成数据仅用于科研教学和算法测试，不代表真实实验结果</span>
       </footer>
 

@@ -202,7 +202,7 @@ export function downloadText(text: string, filename: string, type = 'text/csv;ch
 export function experimentMetadata(result: SimulationResult) {
   return {
     synthetic: true,
-    generator: 'SPR Synthetic Data Studio',
+    generator: '生成可分析科研数据工作台',
     simulatorVersion: '0.1.0',
     createdAt: result.createdAt,
     seed: result.settings.seed,
@@ -269,7 +269,7 @@ export async function downloadDatasetZip(
   zip.file(
     'README.txt',
     [
-      'SPR Synthetic Data Studio',
+      '生成可分析科研数据工作台',
       'Synthetic data only. For research teaching and method testing.',
       `Seed: ${result.settings.seed}`,
       'Association injection starts at time_injection_aligned_s = 0.',

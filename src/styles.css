@@ -37,9 +37,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .combined-switcher button.active { color: #062a25; border-color: #62d3c2; background: #62d3c2; }
 .combined-shell.wb-mode .app > .tabs { visibility: hidden; }
 .combined-shell.wb-mode .app > .topbar .brand h1 { font-size: 0; }
-.combined-shell.wb-mode .app > .topbar .brand h1::after { content: 'WB / SPR 科研数据工作台'; font-size: 24px; }
+.combined-shell.wb-mode .app > .topbar .brand h1::after { content: '生成可分析科研数据工作台'; font-size: 24px; }
 .combined-shell.wb-mode .app > .topbar .brand .eyebrow { font-size: 0; }
-.combined-shell.wb-mode .app > .topbar .brand .eyebrow::after { content: 'RESEARCH DATA STUDIO'; font-size: 10px; }
+.combined-shell.wb-mode .app > .topbar .brand .eyebrow::after { content: 'RESEARCH DATA WORKBENCH'; font-size: 10px; }
 .combined-shell.wb-mode .app > .topbar .brand p { font-size: 0; }
 .combined-shell.wb-mode .app > .topbar .brand p::after { content: 'Western Blot 灰度测量与 SPR 合成数据生成'; font-size: 11px; }
 .combined-shell.spr-mode-active { background: #edf3f1; }
