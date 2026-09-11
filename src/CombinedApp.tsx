@@ -1,17 +1,21 @@
-import { FlaskConical, Image as ImageIcon } from 'lucide-react'
-import { useState } from 'react'
+import { BarChart3, FlaskConical, Image as ImageIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { WbApp } from './App'
 import SprApp from './spr/App'
+import StatApp from './stat/App'
 
-type Mode = 'wb' | 'spr'
+type Mode = 'wb' | 'spr' | 'stat'
 
 function ModeSwitcher({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) => void }) {
   return (
     <nav className="combined-switcher" aria-label="科研工具模式">
-      <button className={mode === 'wb' ? 'active' : ''} onClick={() => onChange('wb')}>
+      <button type="button" className={mode === 'stat' ? 'active' : ''} aria-pressed={mode === 'stat'} onClick={() => onChange('stat')}>
+        <BarChart3 size={16} /> 数据反推生成
+      </button>
+      <button type="button" className={mode === 'wb' ? 'active' : ''} aria-pressed={mode === 'wb'} onClick={() => onChange('wb')}>
         <ImageIcon size={16} /> WB 灰度测量
       </button>
-      <button className={mode === 'spr' ? 'active' : ''} onClick={() => onChange('spr')}>
+      <button type="button" className={mode === 'spr' ? 'active' : ''} aria-pressed={mode === 'spr'} onClick={() => onChange('spr')}>
         <FlaskConical size={16} /> SPR 数据生成
       </button>
     </nav>
@@ -20,12 +24,22 @@ function ModeSwitcher({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) =
 
 export default function CombinedApp({ onLogout }: { onLogout: () => void }) {
   const [mode, setMode] = useState<Mode>('wb')
+  const [visited, setVisited] = useState<Mode[]>(['wb'])
+  const changeMode = (next: Mode) => {
+    setVisited((current) => current.includes(next) ? current : [...current, next])
+    setMode(next)
+  }
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+    return () => cancelAnimationFrame(frame)
+  }, [mode])
+  const navigation = <ModeSwitcher mode={mode} onChange={changeMode} />
   return (
-    <div className={`combined-shell ${mode === 'wb' ? 'wb-mode' : 'spr-mode-active'}`}>
-      <ModeSwitcher mode={mode} onChange={setMode} />
+    <div className={`combined-shell ${mode}-mode-active`}>
       <div className="mode-content">
-        <div className={`wb-stage ${mode === 'wb' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'wb'}><WbApp onLogout={onLogout} /></div>
-        <div className={`spr-stage ${mode === 'spr' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'spr'}><SprApp onLogout={onLogout} /></div>
+        <div className={`wb-stage ${mode === 'wb' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'wb'}><WbApp active={mode === 'wb'} onLogout={onLogout} navigation={navigation} /></div>
+        {visited.includes('stat') && <div className={`stat-stage ${mode === 'stat' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'stat'}><StatApp onLogout={onLogout} navigation={navigation} /></div>}
+        {visited.includes('spr') && <div className={`spr-stage ${mode === 'spr' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'spr'}><SprApp onLogout={onLogout} navigation={navigation} /></div>}
       </div>
     </div>
   )

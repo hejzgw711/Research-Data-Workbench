@@ -4,6 +4,8 @@
   background: #edf3f1;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 @scope (.spr-mode) {
@@ -73,7 +75,7 @@ button {
   display: block;
   margin-top: 3px;
   color: #9eb4b3;
-  font-size: 10px;
+  font-size: .75rem;
 }
 
 .top-status,
@@ -88,7 +90,7 @@ button {
   font-size: 12px;
 }
 .spr-top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-.spr-logout-button { min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid #c9d8d4; border-radius: 6px; color: #52635f; background: #ffffff; font-size: 11px; font-weight: 750; }
+.spr-logout-button { min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid #c9d8d4; border-radius: 6px; color: #52635f; background: #ffffff; font-size: .8125rem; font-weight: 750; }
 .spr-logout-button:hover { border-color: #177f6b; color: #176a59; }
 
 .top-status svg,
@@ -128,7 +130,7 @@ button {
 .intro-panel > span,
 .result-heading > div > span {
   color: #177462;
-  font-size: 10px;
+  font-size: .75rem;
   font-weight: 700;
 }
 
@@ -176,7 +178,7 @@ button {
   border-radius: 6px;
   background: #eef8f5;
   color: #177462;
-  font-size: 11px;
+  font-size: .8125rem;
   font-weight: 700;
 }
 
@@ -198,7 +200,7 @@ button {
 .chart-controls label > span,
 .view-toolbar label > span {
   color: #435351;
-  font-size: 11px;
+  font-size: .8125rem;
   font-weight: 600;
 }
 
@@ -267,7 +269,7 @@ select:disabled {
   background: #f4f7f6;
   color: #687775;
   white-space: nowrap;
-  font-size: 10px;
+  font-size: .75rem;
 }
 
 .input-with-unit:has(small) input {
@@ -445,7 +447,7 @@ select:disabled {
 .summary-grid span,
 .metadata-grid span {
   color: #6b7977;
-  font-size: 11px;
+  font-size: .8125rem;
 }
 
 .summary-grid strong {
@@ -455,7 +457,7 @@ select:disabled {
 
 .summary-grid small {
   color: #8a9694;
-  font-size: 10px;
+  font-size: .75rem;
 }
 
 .summary-grid .status-summary {
@@ -508,7 +510,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: #ffffff;
-  font-size: 11px;
+  font-size: .8125rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -537,7 +539,7 @@ td:first-child {
 .table-note {
   margin: 10px 0 0;
   color: #74817f;
-  font-size: 11px;
+  font-size: .8125rem;
 }
 
 .metadata-grid {
@@ -578,7 +580,7 @@ td:first-child {
 
 .result-heading.compact > small {
   color: #74817f;
-  font-size: 10px;
+  font-size: .75rem;
   text-align: right;
 }
 
@@ -617,7 +619,7 @@ td:first-child {
 .export-grid small,
 .dataset-button small {
   color: #7a8785;
-  font-size: 10px;
+  font-size: .75rem;
   font-weight: 400;
 }
 
@@ -639,7 +641,7 @@ footer {
   justify-content: space-between;
   gap: 18px;
   color: #6f7f7c;
-  font-size: 11px;
+  font-size: .8125rem;
 }
 
 .toast {
@@ -771,5 +773,30 @@ footer {
     padding: 18px 16px 64px;
     flex-direction: column;
   }
+}
+.field, input, select, textarea, .tabs button, .segmented button,
+.export-grid button > span, .dataset-button > span, table, .spr-logout-button { font-size: .875rem; }
+.ready-indicator { flex-shrink: 0; font-size: .875rem; }
+.ready-indicator svg { color: #177f6b; }
+.ready-indicator.pending { color: #98571f; border-color: #d7b692; background: #fff6eb; }
+.ready-indicator.pending svg { color: inherit; }
+.result-state { margin: 0 20px 16px; padding: 10px 12px; border: 1px solid #d7b692; border-radius: 6px; color: #805025; background: #fff6eb; font-size: .875rem; }
+.topbar { height: auto; min-height: 86px; padding-top: 16px; padding-bottom: 16px; flex-wrap: wrap; gap: 14px; }
+.brand, .brand > div { min-width: 0; }
+.brand-mark { flex-shrink: 0; }
+.spr-top-actions, .result-heading { flex-wrap: wrap; }
+.workspace { grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); }
+.parameter-grid { grid-template-columns: minmax(0, 1fr); }
+.chart-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.chart-controls > .segmented { grid-column: 1 / -1; justify-self: start; }
+.field-pair > *, .input-with-unit { min-width: 0; }
+.input-with-unit small { padding: 0 5px; }
+@media (max-width: 1250px) {
+  .workspace { grid-template-columns: minmax(0, 1fr); }
+  .parameter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .parameter-grid, .chart-controls { grid-template-columns: minmax(0, 1fr); }
+  .brand strong { font-size: 18px; }
 }
 }

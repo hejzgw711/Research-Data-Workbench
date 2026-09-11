@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import './styles.css'
 import {
   BarChart3,
@@ -105,9 +105,11 @@ function DataPreview({ headers, rows }: { headers: string[]; rows: Array<Array<s
   )
 }
 
-export default function App({ onLogout }: { onLogout?: () => void }) {
+export default function App({ onLogout, navigation }: { onLogout?: () => void; navigation?: ReactNode }) {
   const [draft, setDraft] = useState<SimulationSettings>(defaultSettings)
   const [result, setResult] = useState<SimulationResult>(() => simulateExperiment(defaultSettings))
+  const [resultInput, setResultInput] = useState(() => JSON.stringify(defaultSettings))
+  const dirty = JSON.stringify(draft) !== resultInput
   const [activeTab, setActiveTab] = useState<TabKey>('chart')
   const [chartMode, setChartMode] = useState<'overlay' | 'single'>('overlay')
   const [curve, setCurve] = useState<CurveKey>('doubleReferencedRU')
@@ -130,6 +132,7 @@ export default function App({ onLogout }: { onLogout?: () => void }) {
     try {
       const nextResult = simulateExperiment(draft)
       setResult(nextResult)
+      setResultInput(JSON.stringify(draft))
       setCycleId(nextResult.cycles.find((cycle) => cycle.plan.kind === 'sample')?.plan.id ?? 1)
       setMessage(`已生成 ${nextResult.cycles.length} 个循环、${nextResult.points.length} 个采样点`)
     } catch (error) {
@@ -162,6 +165,7 @@ export default function App({ onLogout }: { onLogout?: () => void }) {
         </div>
         <div className="spr-top-actions"><div className="top-status"><Sparkles size={15} /> Seed {result.settings.seed}</div>{onLogout && <button className="spr-logout-button" onClick={onLogout}><LogOut size={15} />退出登录</button>}</div>
       </header>
+      {navigation}
 
       <main className="workspace">
         <aside className="parameter-column">
@@ -225,7 +229,7 @@ export default function App({ onLogout }: { onLogout?: () => void }) {
                 <NumberField label="Rmax" value={draft.rmaxRU} unit="RU" min={0} step={10} onChange={(value) => update('rmaxRU', value)} />
               </div>
               <div className="formula-strip">
-                <span>K<sub>D</sub> = k<sub>d</sub> / k<sub>a</sub></span>
+                <span>{dirty ? '上次结果：' : ''}K<sub>D</sub> = k<sub>d</sub> / k<sub>a</sub></span>
                 <strong>{concentrationToDisplay(result.kdM)}</strong>
                 <span>t½ = {formatValue(result.halfLifeS, 1)} s</span>
               </div>
@@ -268,8 +272,9 @@ export default function App({ onLogout }: { onLogout?: () => void }) {
                 <span>LIVE SENSORGRAM</span>
                 <h2>响应曲线与数据预览</h2>
               </div>
-              <div className="ready-indicator"><CheckCircle2 size={16} /> 数据就绪</div>
+              <div className={`ready-indicator ${dirty ? 'pending' : ''}`}>{dirty ? <RefreshCw size={16} /> : <CheckCircle2 size={16} />}{dirty ? '待重新生成' : '结果已更新'}</div>
             </div>
+            {dirty && <p className="result-state" role="status">参数已修改，当前显示上次结果；复制和导出仍使用当前显示的结果。请点击“生成数据”更新。</p>}
 
             <nav className="tabs" aria-label="结果视图">
               {([

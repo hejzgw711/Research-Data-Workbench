@@ -16,11 +16,15 @@
     "utif": "^3.1.0",
     "echarts": "latest",
     "echarts-for-react": "latest",
-    "jszip": "latest"
+    "jszip": "latest",
+    "exceljs": "4.4.0",
+    "jstat": "1.9.6",
+    "seedrandom": "3.0.5"
   },
   "devDependencies": {
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/seedrandom": "3.0.8",
     "@vitejs/plugin-react": "latest",
     "typescript": "latest",
     "vite": "latest",
