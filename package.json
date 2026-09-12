@@ -7,27 +7,30 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5176",
     "build": "tsc -b && vite build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "lucide-react": "latest",
-    "react": "latest",
-    "react-dom": "latest",
+    "lucide-react": "1.37.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "utif": "^3.1.0",
-    "echarts": "latest",
-    "echarts-for-react": "latest",
-    "jszip": "latest",
+    "echarts": "6.1.0",
+    "echarts-for-react": "3.0.6",
+    "jszip": "3.10.1",
     "exceljs": "4.4.0",
     "jstat": "1.9.6",
-    "seedrandom": "3.0.5"
+    "seedrandom": "3.0.5",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
+    "@playwright/test": "^1.55.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
     "@types/seedrandom": "3.0.8",
-    "@vitejs/plugin-react": "latest",
-    "typescript": "latest",
-    "vite": "latest",
-    "vitest": "latest"
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
   }
 }

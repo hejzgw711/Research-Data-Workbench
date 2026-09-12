@@ -1,0 +1,16 @@
+.qpcr-host { height: 100vh; height: 100dvh; min-height: 600px; display: flex; flex-direction: column; padding: 18px 18px 0; color: #e6efee; background: #071817; }
+.qpcr-host-header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border: 1px solid #163f3a; border-radius: 8px; background: #092522; }
+.qpcr-host-header span { color: #62d3c2; font-size: .75rem; font-weight: 850; letter-spacing: 1.6px; }
+.qpcr-host-header h1 { margin: 3px 0; font-size: 24px; line-height: 1.15; }
+.qpcr-host-header p { margin: 0; color: #8da7a3; font-size: .8125rem; }
+.qpcr-host-header button { min-height: 38px; display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; border: 1px solid #1b4c46; border-radius: 7px; color: #e6efee; background: #0d302c; font-weight: 700; white-space: nowrap; }
+.qpcr-host-header button:focus-visible { outline: 2px solid #62d3c2; outline-offset: 3px; }
+.qpcr-host > .combined-switcher { flex-shrink: 0; margin-bottom: 0; }
+.qpcr-tool-frame { display: block; flex: 1; width: 100%; min-height: 0; border: 0; background: #f0f6f5; }
+.qpcr-loading { margin: 0; padding: 10px; color: #8da7a3; font-size: .875rem; }
+@media (max-width: 700px) {
+  .qpcr-host { padding: 0; }
+  .qpcr-host-header { padding: 12px; flex-wrap: wrap; border-radius: 0; }
+  .qpcr-host-header h1 { font-size: 20px; }
+  .qpcr-host > .combined-switcher { padding-left: 10px; padding-right: 10px; }
+}

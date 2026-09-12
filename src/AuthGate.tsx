@@ -1,18 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import CombinedApp from './CombinedApp'
+import { AUTH_STORAGE_KEY, hasStoredSession } from './authSession'
 
-const AUTH_STORAGE_KEY = 'research-data-workbench-authenticated'
 const ACCOUNT = 'bigNBny'
 const PASSWORD_SHA256 = 'a721200c375289479a02127718f6bc25b64c5a5e87a71ec9735f3e1842d34886'
-
-function hasStoredSession() {
-  try {
-    return window.localStorage.getItem(AUTH_STORAGE_KEY) === '1'
-      || window.sessionStorage.getItem(AUTH_STORAGE_KEY) === '1'
-  } catch {
-    return false
-  }
-}
 
 async function sha256(value: string) {
   if (!window.crypto?.subtle) throw new Error('当前浏览器不支持安全密码校验，请使用最新版浏览器。')
