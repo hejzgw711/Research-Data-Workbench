@@ -52,7 +52,8 @@
     background: var(--surface-2);
   }
   .app :is(.two-way-grid, .ts-cell-grid) thead th { color: var(--accent); }
-  .app :is(.two-way-grid, .ts-cell-grid) tbody > th,
+  .app .two-way-grid tbody > th,
+  .app .ts-cell-grid tbody > tr > th,
   .app .two-way-raw-table tbody th { color: var(--text); background: #eaf2ee; }
   .app .status.pass { color: #196945; background: #e3f2e9; }
   .app .status.fail { color: #a33131; background: #f9e5e5; }

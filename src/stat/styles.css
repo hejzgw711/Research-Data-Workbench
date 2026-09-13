@@ -244,9 +244,12 @@ th { position: sticky; top: 0; color: var(--muted); background: #0b2926; }
 .ts-cell-grid { min-width: 680px; table-layout: fixed; }
 .ts-cell-grid th, .ts-cell-grid td { min-width: 150px; padding: 8px; vertical-align: top; border-top: 1px solid var(--border); border-left: 1px solid var(--border); text-align: left; }
 .ts-cell-grid thead th { position: sticky; top: 0; z-index: 2; color: var(--accent); background: #0b2926; text-align: center; }
+.ts-cell-grid thead th:first-child { left: 0; z-index: 3; width: 80px; min-width: 80px; }
 .ts-cell-grid thead th small { display: block; margin-top: 2px; color: var(--muted); font-size: .75rem; font-weight: 400; }
-.ts-cell-grid tbody > th { position: sticky; left: 0; z-index: 1; min-width: 130px; color: var(--text); background: #0d302c; }
-.ts-cell-grid tbody > th .group-mark { display: inline-grid; margin-right: 5px; vertical-align: middle; }
+.ts-cell-grid tbody > tr > th { position: sticky; top: auto; left: 0; z-index: 1; width: 80px; min-width: 80px; vertical-align: middle; text-align: center; color: var(--text); background: #0d302c; }
+.ts-group-label { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ts-cell-grid .ts-group-label .group-mark { flex: none; margin: 0; }
+.ts-group-name { display: block; writing-mode: sideways-lr; max-height: 180px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ts-cell-config { display: flex; flex-direction: column; gap: 6px; }
 .ts-cell-config input { height: 30px; }
 .ts-chart-settings { display: grid; grid-template-columns: 1.3fr 1fr 1fr 100px; gap: 8px; margin-top: 12px; }
