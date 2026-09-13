@@ -44,7 +44,8 @@ async function openQpcr(page: Page) {
 
 async function downloadFromQpcr(page: Page, name: string) {
   const pending = page.waitForEvent('download')
-  await page.frameLocator(frameSelector).getByRole('button', { name, exact: true }).click()
+  const scope = ['XLSX＋原始数据', 'CSV ZIP', '保存'].includes(name) ? page.locator('.qpcr-host .workbench-header') : page.frameLocator(frameSelector)
+  await scope.getByRole('button', { name, exact: true }).click()
   const download = await pending
   expect(await download.failure()).toBeNull()
   const path = await download.path()
@@ -82,9 +83,9 @@ for (const storage of ['sessionStorage', 'localStorage'] as const) {
   })
 }
 
-test('switching modes preserves qPCR inputs, selected plate and iframe while isolating its theme', async ({ page }) => {
+test('switching modes preserves qPCR inputs, selected plate and iframe while sharing the theme', async ({ page }) => {
   await authenticate(page)
-  const wbHeader = page.locator('.wb-stage .topbar')
+  const wbHeader = page.locator('.wb-stage .workbench-header')
   const wbStyle = await wbHeader.evaluate(element => ({
     color: getComputedStyle(element).color,
     background: getComputedStyle(element).backgroundColor,
@@ -92,7 +93,7 @@ test('switching modes preserves qPCR inputs, selected plate and iframe while iso
   const qpcr = await openQpcr(page)
   const timeOrigin = await qpcr.locator('html').evaluate(() => performance.timeOrigin)
   const parentTheme = await page.locator('html').getAttribute('data-theme')
-  const hostStyle = await page.locator('.qpcr-host-header').evaluate(element => ({
+  const hostStyle = await page.locator('.qpcr-host .workbench-header').evaluate(element => ({
     color: getComputedStyle(element).color,
     background: getComputedStyle(element).backgroundColor,
   }))
@@ -100,13 +101,13 @@ test('switching modes preserves qPCR inputs, selected plate and iframe while iso
   await qpcr.getByRole('spinbutton', { name: '随机种子', exact: true }).fill('20260913')
   await qpcr.getByRole('spinbutton', { name: '随机种子', exact: true }).press('Tab')
   const expression = (await qpcr.getByTestId('expression-table').textContent())!
-  await qpcr.getByRole('button', { name: '深色主题', exact: true }).click()
+  await page.getByRole('button', { name: '切换到深色主题', exact: true }).click()
   await expect(qpcr.locator('html')).toHaveAttribute('data-theme', 'dark')
   expect(await page.locator('html').getAttribute('data-theme')).toBe(parentTheme)
-  expect(await page.locator('.qpcr-host-header').evaluate(element => ({
+  expect(await page.locator('.qpcr-host .workbench-header').evaluate(element => ({
     color: getComputedStyle(element).color,
     background: getComputedStyle(element).backgroundColor,
-  }))).toEqual(hostStyle)
+  }))).not.toEqual(hostStyle)
   await qpcr.getByRole('button', { name: '高级孔板', exact: true }).click()
   await expect(qpcr.locator('.plate-well')).toHaveCount(96)
   await expect(qpcr.locator('.plate-well.assigned')).toHaveCount(72)
@@ -117,7 +118,7 @@ test('switching modes preserves qPCR inputs, selected plate and iframe while iso
   expect(await wbHeader.evaluate(element => ({
     color: getComputedStyle(element).color,
     background: getComputedStyle(element).backgroundColor,
-  }))).toEqual(wbStyle)
+  }))).not.toEqual(wbStyle)
   await changeMode(page, 'qPCR 数据模拟')
   expect(await qpcr.locator('html').evaluate(() => performance.timeOrigin)).toBe(timeOrigin)
   await expect(qpcr.getByRole('textbox', { name: '项目名称', exact: true })).toHaveValue('集成状态保持验收')
@@ -126,7 +127,7 @@ test('switching modes preserves qPCR inputs, selected plate and iframe while iso
   await expect(qpcr.locator('.plate-curves svg')).toHaveCount(2)
   await qpcr.getByRole('button', { name: '分组模拟', exact: true }).click()
   await expect(qpcr.getByTestId('expression-table')).toHaveText(expression)
-  await qpcr.getByRole('button', { name: '浅色主题', exact: true }).click()
+  await page.getByRole('button', { name: '切换到浅色主题', exact: true }).click()
   await expect(qpcr.locator('html')).toHaveAttribute('data-theme', 'light')
   await page.screenshot({ path: 'test-results/qpcr-integration-desktop.png', fullPage: true })
 })
@@ -135,24 +136,33 @@ test('iframe downloads include analysis XLSX, full raw XLSX and raw CSV files', 
   await authenticate(page)
   await openQpcr(page)
   const xlsx = await downloadFromQpcr(page, 'XLSX＋原始数据')
-  expect(xlsx.name).toMatch(/-SIMULATED-XLSX-RAW\.zip$/)
+  expect(xlsx.name).toMatch(/-XLSX-RAW\.zip$/)
+  expect(xlsx.name).not.toMatch(/SIMULATED|模拟/)
   const bundle = await JSZip.loadAsync(xlsx.bytes)
-  const analysisName = Object.keys(bundle.files).find(name => !name.startsWith('raw/') && name.endsWith('-SIMULATED.xlsx'))
+  const analysisName = Object.keys(bundle.files).find(name => !name.startsWith('raw/') && name.endsWith('-analysis.xlsx'))
   expect(analysisName).toBeDefined()
   const analysis = await JSZip.loadAsync(await bundle.file(analysisName!)!.async('uint8array'))
   expect(await analysis.file('xl/workbook.xml')!.async('string')).toContain('Raw Cq')
-  const rawFile = bundle.file('raw/SIMULATED-RAW-Plate-1.xlsx')
+  const rawFile = bundle.file('raw/RAW-Plate-1.xlsx')
   expect(rawFile).not.toBeNull()
   const raw = await JSZip.loadAsync(await rawFile!.async('uint8array'))
   const workbookXml = await raw.file('xl/workbook.xml')!.async('string')
   for (const sheet of ['Summary', 'Sample Setup', 'Amplification Data', 'Melt Curve Raw Data', 'Melt Curve Result', 'Results']) {
     expect(workbookXml).toContain(`name="${sheet}"`)
   }
-  expect(await bundle.file('README-SIMULATED.txt')!.async('string')).toContain('SIMULATED RAW DATA')
+  expect(await bundle.file('README.txt')!.async('string')).not.toMatch(/SIMULATED|synthetic|模拟数据/i)
+  for (const workbook of [analysis, raw]) {
+    const strings = await workbook.file('xl/sharedStrings.xml')!.async('string')
+    expect(strings).not.toMatch(/SIMULATED|synthetic|模拟数据|模拟原始数据/i)
+    expect(strings).not.toContain('Data Type')
+  }
   const csv = await downloadFromQpcr(page, 'CSV ZIP')
   const csvBundle = await JSZip.loadAsync(csv.bytes)
   expect(csvBundle.file('cq.csv')).not.toBeNull()
-  expect(await csvBundle.file('metadata.csv')!.async('string')).toContain('SIMULATED')
+  for (const entry of Object.values(csvBundle.files).filter(entry => !entry.dir)) {
+    expect(entry.name).not.toMatch(/SIMULATED|synthetic|模拟/i)
+    expect(await entry.async('string')).not.toMatch(/SIMULATED|synthetic|模拟数据|模拟原始数据/i)
+  }
   for (const name of ['metadata', 'sample-setup', 'amplification', 'melt-raw', 'melt-result', 'results']) {
     expect(csvBundle.file(`raw/Plate-1/${name}.csv`), name).not.toBeNull()
   }
@@ -160,6 +170,29 @@ test('iframe downloads include analysis XLSX, full raw XLSX and raw CSV files', 
     const text = await csvBundle.file(`raw/Plate-1/${name}.csv`)!.async('string')
     expect(text.trimEnd().split(/\r?\n/)).toHaveLength(expectedRows + 1)
   }
+})
+
+test('curve downloads omit display watermarks while the live preview keeps them', async ({ page }) => {
+  await authenticate(page)
+  const qpcr = await openQpcr(page)
+  await qpcr.getByRole('button', { name: '高级孔板', exact: true }).click()
+  await expect(qpcr.locator('.plate-curves')).toContainText('SIMULATED / 模拟数据')
+  for (const kind of ['扩增曲线', '熔解曲线']) {
+    const exported = await downloadFromQpcr(page, `导出${kind} SVG`)
+    expect(exported.bytes.toString()).toContain('<svg')
+    expect(exported.bytes.toString()).not.toMatch(/SIMULATED|模拟数据/)
+    await expect(qpcr.locator('.plate-curves')).toContainText('SIMULATED / 模拟数据')
+  }
+  const png = await downloadFromQpcr(page, '导出扩增曲线 PNG')
+  expect(png.bytes.subarray(1, 4).toString()).toBe('PNG')
+  const bundle = await downloadFromQpcr(page, '全部孔板 ZIP')
+  const zip = await JSZip.loadAsync(bundle.bytes)
+  expect(Object.keys(zip.files).filter(name => name.endsWith('.csv'))).toHaveLength(144)
+  expect(Object.keys(zip.files).filter(name => name.endsWith('.svg'))).toHaveLength(2)
+  for (const entry of Object.values(zip.files).filter(entry => !entry.dir)) {
+    expect(await entry.async('string')).not.toMatch(/SIMULATED|synthetic|模拟数据/i)
+  }
+  await expect(qpcr.locator('.plate-curves')).toContainText('SIMULATED / 模拟数据')
 })
 
 test('project round-trip, image export, copied table and confirmation dialog work inside the iframe', async ({ page }) => {
@@ -170,7 +203,7 @@ test('project round-trip, image export, copied table and confirmation dialog wor
   const project = await downloadFromQpcr(page, '保存')
   expect(project.name).toMatch(/\.qpcr\.json$/)
   expect(JSON.parse(project.bytes.toString()).simulationAlgorithmVersion).toBe(2)
-  await qpcr.getByRole('button', { name: '换一批数据', exact: true }).click()
+  await page.getByRole('button', { name: '换一批数据', exact: true }).click()
   await expect(qpcr.getByTestId('expression-table')).not.toHaveText(original)
   await qpcr.getByLabel('打开项目文件', { exact: true }).setInputFiles({ name: 'restored.qpcr.json', mimeType: 'application/json', buffer: project.bytes })
   await expect(qpcr.getByTestId('expression-table')).toHaveText(original)
@@ -179,7 +212,8 @@ test('project round-trip, image export, copied table and confirmation dialog wor
   expect(png.bytes.subarray(1, 4).toString()).toBe('PNG')
   const svg = await downloadFromQpcr(page, 'SVG')
   expect(svg.bytes.toString()).toContain('<svg')
-  expect(svg.bytes.toString()).toContain('SIMULATED')
+  expect(svg.bytes.toString()).not.toContain('SIMULATED')
+  await expect(qpcr.locator('.expression-chart')).toContainText('SIMULATED')
   // Intercept only this isolated browser's clipboard API, never the user's clipboard.
   await qpcr.locator('html').evaluate(() => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
@@ -188,10 +222,15 @@ test('project round-trip, image export, copied table and confirmation dialog wor
   })
   await qpcr.getByRole('button', { name: '复制表格', exact: true }).click()
   await expect(qpcr.getByRole('status')).toContainText('已复制表达量表')
-  expect(await qpcr.locator('html').getAttribute('data-test-clipboard')).toContain('SIMULATED')
+  expect(await qpcr.locator('html').getAttribute('data-test-clipboard')).not.toMatch(/SIMULATED|模拟数据/)
   const toastBox = await qpcr.getByRole('status').boundingBox()
   expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(page.viewportSize()!.height)
-  await qpcr.getByRole('button', { name: '新建实验', exact: true }).click()
+  await qpcr.getByRole('button', { name: '计算明细', exact: true }).click()
+  await qpcr.getByRole('button', { name: '复制表格', exact: true }).click()
+  await expect(qpcr.getByRole('status')).toContainText('已复制计算明细')
+  expect(await qpcr.locator('html').getAttribute('data-test-clipboard')).not.toMatch(/SIMULATED|模拟数据/)
+  await qpcr.getByRole('button', { name: '倍数数据', exact: true }).click()
+  await page.getByRole('button', { name: '新建实验', exact: true }).click()
   const dialog = qpcr.getByRole('dialog', { name: '新建实验？', exact: true })
   await expect(dialog).toBeInViewport()
   const dialogBox = await dialog.boundingBox()

@@ -3,11 +3,10 @@ import JSZip from 'jszip'
 import type { QPCRProject, SimulationResult, PCRStep, CurvePoint } from '../../models'
 import { amplificationCurve, meltingCurve } from '../../domain/qpcr'
 import { getSimulationAlgorithmVersion } from '../project'
-import { assertRawExportSize, createRawTables, rawPlateIndexes, rawReadme } from './raw'
+import { assertRawExportSize, createRawTables, dataProjectName, rawPlateIndexes, rawReadme } from './raw'
 
 type Cell = string | number | boolean | null
 interface ExportTable { sheet: string; filename: string; columns: string[]; rows: Cell[][] }
-const SIMULATION_NOTE = 'SIMULATED DATA / 模拟数据，仅供教学与方法验证，不代表真实实验测量'
 const MAX_RAW_CURVE_CELLS = 500000
 
 export function downloadBlob(content: Blob | string, filename: string, mime = 'text/plain;charset=utf-8'): void {
@@ -76,8 +75,8 @@ function createTables(project: QPCRProject, result: SimulationResult): ExportTab
   const includeCurves = estimatedRawCells <= MAX_RAW_CURVE_CELLS
   const tables: ExportTable[] = [
     { sheet: 'Summary', filename: 'metadata.csv', columns: ['Field', 'Value'], rows: [
-      ['Data provenance', SIMULATION_NOTE], ['Project', project.name], ['Project ID', project.id],
-      ['Schema version', 1], ['Simulation algorithm version', getSimulationAlgorithmVersion(project)], ['Curve model', project.simulation.curveModel ?? 'legacy-v1'], ['Random seed', project.randomSeed],
+      ['Project', dataProjectName(project)], ['Project ID', project.id],
+      ['Schema version', 1], ['Algorithm version', getSimulationAlgorithmVersion(project)], ['Curve model', project.simulation.curveModel ?? 'legacy-v1'], ['Random seed', project.randomSeed],
       ['Replicate design', project.replicateMode], ['Input mode', project.inputMode],
       ['Statistical unit', project.replicateMode === 'biological' ? 'Biological sample; technical Cq values aggregated before inference' : 'Technical-repeat preview; non-inferential'],
       ['Statistical test', 'Two-sided Welch t-test on ΔCq'], ['Multiple comparison adjustment', project.simulation.correction],
@@ -85,20 +84,21 @@ function createTables(project: QPCRProject, result: SimulationResult): ExportTab
       ['Normalization', 'Fold change = 2^(-ΔΔCq); calibrator geometric mean = 1'],
       ['Total assigned wells', result.totalWells], ['Plate count', result.plateCount],
       ['QC status', result.qc.some(item => item.level === 'fail') ? 'FAIL' : result.qc.some(item => item.level === 'warning') ? 'WARNING' : 'PASS'],
-      ['Raw curve tables', includeCurves ? 'Included; fluorescence/peak are synthetic values. Complete reference-style tables are also in raw/.' : 'Wide analysis curve tables omitted above 500,000 values; complete per-plate raw tables accompany this data-export ZIP in raw/.'],
+      ['Raw curve tables', includeCurves ? 'Included. Complete reference-style tables are also in raw/.' : 'Wide analysis curve tables omitted above 500,000 values; complete per-plate raw tables accompany this data-export ZIP in raw/.'],
+      ['Wide melt signal', 'Melt Data / melt-data.csv contains -dF/dT in a.u./°C at the column-header temperatures (°C), not fluorescence F.'],
     ] },
     { sheet: 'Groups', filename: 'groups.csv', columns: ['Group ID', 'Group', 'Calibrator', 'Biological replicates configured', 'Technical replicates', 'Technical Cq SD', 'Target ID', 'Target', 'Nominal fold', 'Fold SD mode', 'Fold SD'], rows:
       project.groups.flatMap(group => Object.entries(group.targetFoldByGene).map(([geneId, config]) => [group.id, group.name, group.isCalibrator, group.biologicalReplicates, group.technicalReplicates, group.technicalCqSD, geneId, genes.get(geneId) ?? geneId, config.mean, config.sdMode, config.sd])) },
     { sheet: 'Genes', filename: 'genes.csv', columns: ['Gene ID', 'Gene', 'Role', 'Nominal Cq', 'Expected Tm (°C)', 'Primer concentration (µM)', 'Melt FWHM (°C)'], rows:
       project.genes.map(gene => [gene.id, gene.name, gene.type, gene.nominalCq, gene.tmC, gene.primerConcentration, gene.meltFwhmC]) },
-    { sheet: 'Raw Cq', filename: 'cq.csv', columns: ['Well ID', 'Plate', 'Position', 'Stable key', 'Group', 'Gene', 'Sample ID', 'Biological replicate', 'Technical replicate', 'Cq', 'Generated Cq', 'Excluded', 'Adjusted', 'Data type'], rows:
-      result.wells.map(well => [well.id, well.plateIndex + 1, well.wellId, well.key, groups.get(well.groupId) ?? well.groupId, genes.get(well.geneId) ?? well.geneId, well.sampleId, well.biologicalReplicate, well.technicalReplicate, well.values.cq, well.generated.cq, well.excluded, well.adjusted, 'SIMULATED']) },
+    { sheet: 'Raw Cq', filename: 'cq.csv', columns: ['Well ID', 'Plate', 'Position', 'Stable key', 'Group', 'Gene', 'Sample ID', 'Biological replicate', 'Technical replicate', 'Cq', 'Generated Cq', 'Excluded', 'Adjusted'], rows:
+      result.wells.map(well => [well.id, well.plateIndex + 1, well.wellId, well.key, groups.get(well.groupId) ?? well.groupId, genes.get(well.geneId) ?? well.geneId, well.sampleId, well.biologicalReplicate, well.technicalReplicate, well.values.cq, well.generated.cq, well.excluded, well.adjusted]) },
     { sheet: 'ΔCq', filename: 'delta-cq.csv', columns: ['Sample ID', 'Group', 'Target', 'Replicate', 'Reference Cq', 'Target Cq', 'ΔCq', 'Technical N', 'Inferential'], rows:
       result.samples.map(sample => [sample.id, groups.get(sample.groupId) ?? sample.groupId, genes.get(sample.geneId) ?? sample.geneId, sample.replicate, sample.referenceCq, sample.targetCq, sample.deltaCq, sample.technicalN, sample.inferential]) },
     { sheet: 'ΔΔCq', filename: 'delta-delta-cq.csv', columns: ['Sample ID', 'Group', 'Target', 'Replicate', 'ΔCq', 'ΔΔCq', 'Inferential'], rows:
       result.samples.map(sample => [sample.id, groups.get(sample.groupId) ?? sample.groupId, genes.get(sample.geneId) ?? sample.geneId, sample.replicate, sample.deltaCq, sample.deltaDeltaCq, sample.inferential]) },
-    { sheet: 'Fold Change', filename: 'fold-change.csv', columns: ['Sample ID', 'Group', 'Target', 'Replicate', 'Fold change', 'Inferential', 'Data type'], rows:
-      result.samples.map(sample => [sample.id, groups.get(sample.groupId) ?? sample.groupId, genes.get(sample.geneId) ?? sample.geneId, sample.replicate, sample.fold, sample.inferential, 'SIMULATED']) },
+    { sheet: 'Fold Change', filename: 'fold-change.csv', columns: ['Sample ID', 'Group', 'Target', 'Replicate', 'Fold change', 'Inferential'], rows:
+      result.samples.map(sample => [sample.id, groups.get(sample.groupId) ?? sample.groupId, genes.get(sample.geneId) ?? sample.geneId, sample.replicate, sample.fold, sample.inferential]) },
     { sheet: 'Group Summary', filename: 'group-summary.csv', columns: ['Group', 'Target', 'Sample N', 'Arithmetic mean fold', 'Sample SD fold', 'Geometric mean fold', 'SD of sample-aggregated target Cq', 'Inferential'], rows:
       result.groups.map(group => [groups.get(group.groupId) ?? group.groupId, genes.get(group.geneId) ?? group.geneId, group.n, group.mean, group.sd, group.geometricMean, group.cqSD, project.replicateMode === 'biological']) },
     { sheet: 'Statistics', filename: 'statistics.csv', columns: ['Comparison ID', 'Target', 'Left group', 'Right group', 'Welch t', 'Degrees of freedom', 'Raw P', 'Reported P', 'Adjustment', 'Significance', 'Inferential', 'Status', 'Reason'], rows:
@@ -118,15 +118,15 @@ function createTables(project: QPCRProject, result: SimulationResult): ExportTab
       if (!meltPoints.length) meltPoints = meltingCurve(well, project)
       if (amplificationPoints.length && meltPoints.length) break
     }
-    tables.push({ sheet: 'Raw Fluorescence', filename: 'raw-fluorescence.csv', columns: ['Well ID', 'Plate', 'Position', 'Data type', ...amplificationPoints.map(point => `Cycle ${point.x}`)], rows:
+    tables.push({ sheet: 'Raw Fluorescence', filename: 'raw-fluorescence.csv', columns: ['Well ID', 'Plate', 'Position', ...amplificationPoints.map(point => `Cycle ${point.x}`)], rows:
       result.wells.map(well => {
         const points = amplificationCurve(well, project)
-        return [well.id, well.plateIndex + 1, well.wellId, 'SIMULATED', ...amplificationPoints.map((_, i) => points[i]?.y ?? null)]
+        return [well.id, well.plateIndex + 1, well.wellId, ...amplificationPoints.map((_, i) => points[i]?.y ?? null)]
       }) })
-    tables.push({ sheet: 'Melt Data', filename: 'melt-data.csv', columns: ['Well ID', 'Plate', 'Position', 'Data type', ...meltPoints.map(point => `${point.x} °C`) ], rows:
+    tables.push({ sheet: 'Melt Data', filename: 'melt-data.csv', columns: ['Well ID', 'Plate', 'Position', ...meltPoints.map(point => `${point.x} °C`) ], rows:
       result.wells.map(well => {
         const points = meltingCurve(well, project)
-        return [well.id, well.plateIndex + 1, well.wellId, 'SIMULATED -dF/dT', ...meltPoints.map((_, i) => points[i]?.y ?? null)]
+        return [well.id, well.plateIndex + 1, well.wellId, ...meltPoints.map((_, i) => points[i]?.y ?? null)]
       }) })
   }
   return tables
@@ -135,8 +135,7 @@ function createTables(project: QPCRProject, result: SimulationResult): ExportTab
 function workbookFromTables(project: QPCRProject, tables: ExportTable[]): ExcelJS.Workbook {
   const workbook = new ExcelJS.Workbook()
   workbook.creator = 'qRT-PCR Data Studio'
-  workbook.subject = SIMULATION_NOTE
-  workbook.title = project.name
+  workbook.title = dataProjectName(project)
   // Stable metadata avoids wall-clock timestamps becoming part of the simulated experiment.
   workbook.created = new Date('2026-01-01T00:00:00Z')
   workbook.modified = new Date('2026-01-01T00:00:00Z')
@@ -148,7 +147,6 @@ function workbookFromTables(project: QPCRProject, tables: ExportTable[]): ExcelJ
     sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF247C71' } }
     sheet.getRow(1).height = 26
     sheet.views = [{ state: 'frozen', ySplit: 1 }]
-    sheet.headerFooter.oddHeader = '&CSIMULATED DATA / 模拟数据'
     sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: table.columns.length } }
     sheet.columns.forEach((column, index) => { column.width = Math.min(42, Math.max(16, table.columns[index].length + 3)) })
     if (table.sheet === 'Summary') { sheet.getColumn(1).width = 34; sheet.getColumn(2).width = 110 }
@@ -176,7 +174,7 @@ export function createRawWorkbook(project: QPCRProject, result: SimulationResult
 export function createCsvFiles(project: QPCRProject, result: SimulationResult): Record<string, string> {
   assertRawExportSize(project, result)
   const files = Object.fromEntries(createTables(project, result).map(table => [table.filename, encodeCsv(table)]))
-  files['README-SIMULATED.txt'] = rawReadme(project)
+  files['README.txt'] = rawReadme(project)
   for (const plateIndex of rawPlateIndexes(result)) {
     for (const table of createRawTables(project, result, plateIndex)) files[`raw/Plate-${plateIndex + 1}/${table.filename}`] = encodeCsv(table)
   }
@@ -187,28 +185,28 @@ export async function createXlsxBundle(project: QPCRProject, result: SimulationR
   assertRawExportSize(project, result)
   const zip = new JSZip()
   const options = { date: new Date('2026-01-01T00:00:00Z'), compression: 'STORE' as const }
-  zip.file('README-SIMULATED.txt', rawReadme(project), options)
+  zip.file('README.txt', rawReadme(project), options)
   {
     const buffer = await createWorkbook(project, result).xlsx.writeBuffer()
-    zip.file(`${safeFilename(project.name)}-SIMULATED.xlsx`, new Uint8Array(buffer), options)
+    zip.file(`${safeFilename(dataProjectName(project))}-analysis.xlsx`, new Uint8Array(buffer), options)
   }
   // One workbook at a time: keep serialized XLSX bytes rather than every plate's cell objects alive.
   for (const plateIndex of rawPlateIndexes(result)) {
     const buffer = await createRawWorkbook(project, result, plateIndex).xlsx.writeBuffer()
-    zip.file(`raw/SIMULATED-RAW-Plate-${plateIndex + 1}.xlsx`, new Uint8Array(buffer), options)
+    zip.file(`raw/RAW-Plate-${plateIndex + 1}.xlsx`, new Uint8Array(buffer), options)
   }
   return zip
 }
 
 export async function exportXlsx(project: QPCRProject, result: SimulationResult): Promise<void> {
   const zip = await createXlsxBundle(project, result)
-  downloadBlob(await zip.generateAsync({ type: 'blob' }), `${safeFilename(project.name)}-SIMULATED-XLSX-RAW.zip`)
+  downloadBlob(await zip.generateAsync({ type: 'blob' }), `${safeFilename(dataProjectName(project))}-XLSX-RAW.zip`)
 }
 
 export async function exportCsvZip(project: QPCRProject, result: SimulationResult): Promise<void> {
   const zip = new JSZip()
   for (const [filename, content] of Object.entries(createCsvFiles(project, result))) zip.file(filename, content, { date: new Date('2026-01-01T00:00:00Z') })
-  downloadBlob(await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${safeFilename(project.name)}-SIMULATED-CSV.zip`)
+  downloadBlob(await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${safeFilename(dataProjectName(project))}-CSV.zip`)
 }
 
 export function summaryTSV(project: QPCRProject, result: SimulationResult, geneId: string): string {
@@ -217,7 +215,7 @@ export function summaryTSV(project: QPCRProject, result: SimulationResult, geneI
   const groupNames = new Map(project.groups.map(group => [group.id, group.name]))
   const geneName = project.genes.find(gene => gene.id === geneId)?.name ?? geneId
   const rows: Cell[][] = [
-    [SIMULATION_NOTE], ['Gene', geneName], ['Statistical unit', project.replicateMode === 'biological' ? 'Biological sample' : 'Technical preview — non-inferential'],
+    ['Gene', geneName], ['Statistical unit', project.replicateMode === 'biological' ? 'Biological sample' : 'Technical preview — non-inferential'],
     ['Group', ...Array.from({ length: replicateCount }, (_, i) => `R${i + 1}`), 'Mean', 'SD', 'Geometric mean', 'N'],
     ...summaries.map(group => {
       const byReplicate = new Map(result.samples.filter(sample => sample.groupId === group.groupId && sample.geneId === geneId).map(sample => [sample.replicate, sample.fold]))

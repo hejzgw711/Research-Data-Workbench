@@ -1,4 +1,6 @@
 import './styles.css'
+import '../wb-stat-theme.css'
+import { WorkbenchHeader } from '../WorkbenchHeader'
 import {
   AlertTriangle,
   BarChart3,
@@ -9,7 +11,6 @@ import {
   FileDown,
   FolderOpen,
   Lock,
-  LogOut,
   Plus,
   Play,
   RefreshCw,
@@ -25,7 +26,7 @@ import ReactECharts from 'echarts-for-react'
 import { ResultChart } from './components/ResultChart'
 import { cloneSettings, defaultSettings, ensurePairwiseConstraints, generateCandidates, syncTwoWayGroups } from './core/generator'
 import { defaultTimeSeriesSettings, generateTimeSeriesCandidates, syncTimeSeriesCells } from './core/timeSeries'
-import { copyPrismColumns, copyPrismGrouped, exportCsv, exportTimeSeriesCsv, exportTimeSeriesXlsx, exportTimeSeriesZip, exportXlsx, exportZip, saveProject, saveTimeSeriesProject } from './exporters'
+import { chartPngDataUrl, copyPrismColumns, copyPrismGrouped, exportCsv, exportTimeSeriesCsv, exportTimeSeriesXlsx, exportTimeSeriesZip, exportXlsx, exportZip, safeName, saveProject, saveTimeSeriesProject } from './exporters'
 import type { Candidate, GenerationReport, GeneratorSettings, GroupConfig, TimePointConfig, TimeSeriesCandidate, TimeSeriesCellConfig, TimeSeriesGenerationReport, TimeSeriesGeneratorSettings, TimeSeriesGroupConfig, TwoWayCellConfig, TwoWaySettings } from './models'
 
 const colors = ['#9acddb', '#e7ad97', '#b7d8aa', '#c4b0dd', '#e3c58d', '#9fb5d8']
@@ -436,19 +437,20 @@ export default function App({ onLogout, navigation }: { onLogout?: () => void; n
   }
 
   const exportPng = () => {
-    const url = chartRef.current?.getEchartsInstance().getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' })
+    const chart = chartRef.current?.getEchartsInstance()
+    const url = chart && chartPngDataUrl(chart, !isTimeSeries)
     if (!url) return
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = `${isTimeSeries ? timeSeriesReport.settings.chartTitle : report.settings.projectName}_plot.png`
+    anchor.download = `${safeName(isTimeSeries ? timeSeriesReport.settings.chartTitle : report.settings.projectName)}_plot.png`
     anchor.click()
   }
 
   return <main className="app">
-    <header className="topbar panel"><div className="brand"><span className="eyebrow">RESEARCH DATA WORKBENCH</span><h1>生成可分析科研数据工作台</h1><p>目标统计约束下的本地随机数据工作台</p></div><div className="top-actions">
+    <WorkbenchHeader subtitle="目标统计约束下的本地随机数据工作台" onLogout={onLogout}>
       <input ref={fileInput} hidden type="file" accept=".json,.synthetic.json" onChange={(event) => event.target.files?.[0] && loadProject(event.target.files[0])} />
-       <button className="button reset" onClick={resetForm} disabled={generating}><RotateCcw size={17} />清空重填</button><button className="button secondary" onClick={() => fileInput.current?.click()} disabled={generating}><FolderOpen size={17} />打开</button><button className="button secondary" onClick={() => isTimeSeries ? saveTimeSeriesProject(timeSeriesSettings, timeSeriesReport) : saveProject(settings, report)}><Save size={17} />保存</button><button className="button primary" onClick={generate} disabled={generating}>{generating ? <RefreshCw className="spin" size={17} /> : <Sparkles size={17} />}{generating ? '搜索中' : '生成方案'}</button><button className="button warm" onClick={() => isTimeSeries ? selectedTimeSeries && exportTimeSeriesXlsx(timeSeriesReport, selectedTimeSeries) : selected && exportXlsx(report, selected)}><FileDown size={17} />导出 XLSX</button><button className="button secondary" onClick={() => isTimeSeries ? exportTimeSeriesZip(timeSeriesReport) : exportZip(report)}><FileArchive size={17} />候选 ZIP</button>{onLogout && <button className="button secondary" onClick={onLogout}><LogOut size={17} />退出登录</button>}
-    </div></header>
+       <button className="button reset" onClick={resetForm} disabled={generating}><RotateCcw size={17} />清空重填</button><button className="button secondary" onClick={() => fileInput.current?.click()} disabled={generating}><FolderOpen size={17} />打开</button><button className="button secondary" onClick={() => isTimeSeries ? saveTimeSeriesProject(timeSeriesSettings, timeSeriesReport) : saveProject(settings, report)}><Save size={17} />保存</button><button className="button primary" onClick={generate} disabled={generating}>{generating ? <RefreshCw className="spin" size={17} /> : <Sparkles size={17} />}{generating ? '搜索中' : '生成方案'}</button><button className="button warm" onClick={() => isTimeSeries ? selectedTimeSeries && exportTimeSeriesXlsx(timeSeriesReport, selectedTimeSeries) : selected && exportXlsx(report, selected)}><FileDown size={17} />导出 XLSX</button><button className="button secondary" onClick={() => isTimeSeries ? exportTimeSeriesZip(timeSeriesReport) : exportZip(report)}><FileArchive size={17} />候选 ZIP</button>
+    </WorkbenchHeader>
     {navigation}
     <nav className="tabs">{!navigation && <button className="active"><BarChart3 size={16} />数据反推生成</button>}<div className="mode-switch" role="tablist" aria-label="分析模式"><button className={analysisMode === 'single' ? 'active' : ''} onClick={() => switchAnalysisMode('single')}>单因素 / t-test</button><button className={analysisMode === 'twoWay' ? 'active' : ''} onClick={() => switchAnalysisMode('twoWay')}>Two-way ANOVA</button><button className={analysisMode === 'timeSeries' ? 'active' : ''} onClick={() => switchAnalysisMode('timeSeries')}>重复测量时间序列</button></div><span className="independent-badge">浏览器本地计算</span>{dirty && <span className="dirty">参数已修改，请重新生成</span>}</nav>
     <div className="warning-banner"><AlertTriangle size={16} /><strong>SIMULATED / 合成模拟数据</strong><span>仅用于教学、绘图、统计方法验证和软件测试，不代表真实实验观测。</span></div>

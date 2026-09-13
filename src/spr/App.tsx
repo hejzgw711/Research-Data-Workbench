@@ -1,5 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import './styles.css'
+import './theme.css'
+import { WorkbenchHeader } from '../WorkbenchHeader'
 import {
   BarChart3,
   CheckCircle2,
@@ -7,12 +9,9 @@ import {
   Database,
   Download,
   FileArchive,
-  FlaskConical,
-  LogOut,
   Play,
   RefreshCw,
   Settings2,
-  Sparkles,
 } from 'lucide-react'
 import SensorgramChart from './components/SensorgramChart'
 import {
@@ -21,6 +20,7 @@ import {
   downloadDatasetZip,
   downloadText,
   experimentMetadata,
+  exportPrefix,
   tableToCsv,
   tableToTsv,
   type ReplicateView,
@@ -148,23 +148,20 @@ export default function App({ onLogout, navigation }: { onLogout?: () => void; n
   const downloadJson = () => {
     downloadText(
       JSON.stringify(experimentMetadata(result), null, 2),
-      `${result.settings.outputPrefix}-experiment.json`,
+      `${exportPrefix(result.settings.outputPrefix)}-experiment.json`,
       'application/json;charset=utf-8',
     )
   }
 
   return (
     <div className="spr-mode app-shell">
-      <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark"><FlaskConical aria-hidden="true" /></span>
-          <div>
-            <strong>生成可分析科研数据工作台</strong>
-            <small>SPR SYNTHETIC SENSORGRAM GENERATOR</small>
-          </div>
-        </div>
-        <div className="spr-top-actions"><div className="top-status"><Sparkles size={15} /> Seed {result.settings.seed}</div>{onLogout && <button className="spr-logout-button" onClick={onLogout}><LogOut size={15} />退出登录</button>}</div>
-      </header>
+      <WorkbenchHeader subtitle="SPR 完整循环、双通道曲线与逐点数据 · 浏览器本地计算" onLogout={onLogout}>
+        <button className="button primary" onClick={generate}><Play size={17} />生成数据</button>
+        <button className="button secondary" onClick={downloadJson}><Download size={17} />实验 JSON</button>
+        <button className="button warm" onClick={() => downloadDatasetZip(result, curve, replicateView)} title="Raw · Processed · Plot · Ground truth · Metadata">
+          <FileArchive size={17} />生成完整 SPR Dataset
+        </button>
+      </WorkbenchHeader>
       {navigation}
 
       <main className="workspace">
@@ -257,10 +254,7 @@ export default function App({ onLogout, navigation }: { onLogout?: () => void; n
                 <NumberField label="浓度 CV" value={draft.concentrationCvPct} unit="%" min={0} max={50} step={0.5} onChange={(value) => update('concentrationCvPct', value)} />
                 <NumberField label="Rmax CV" value={draft.rmaxCvPct} unit="%" min={0} max={50} step={0.5} onChange={(value) => update('rmaxCvPct', value)} />
               </div>
-              <div className="generate-row">
-                <NumberField label="随机 Seed" value={draft.seed} step={1} onChange={(value) => update('seed', value)} />
-                <button className="primary-button" onClick={generate}><Play size={17} /> 生成数据</button>
-              </div>
+              <NumberField label="随机 Seed" value={draft.seed} step={1} onChange={(value) => update('seed', value)} />
             </section>
           </div>
         </aside>
@@ -373,18 +367,13 @@ export default function App({ onLogout, navigation }: { onLogout?: () => void; n
                 <span>EXPORT</span>
                 <h2>复制与生成数据文件</h2>
               </div>
-              <small>所有文件明确标记 synthetic = true</small>
+              <small>导出表格不附加展示标记，参数与 Seed 随实验 JSON 保存</small>
             </div>
             <div className="export-grid">
               <button onClick={copyPlotData}><Clipboard size={17} /><span>复制作图表<small>TSV · Excel / Origin / Prism</small></span></button>
-              <button onClick={() => downloadText(tableToCsv(plotTable), `${result.settings.outputPrefix}-plot.csv`)}><Download size={17} /><span>下载作图 CSV<small>当前曲线与重复模式</small></span></button>
-              <button onClick={() => downloadText(tableToCsv(rawTable), `${result.settings.outputPrefix}-raw.csv`)}><Database size={17} /><span>下载原始 CSV<small>全部循环与逐点分量</small></span></button>
-              <button onClick={downloadJson}><Download size={17} /><span>实验 JSON<small>参数、Seed 与 Cycle plan</small></span></button>
+              <button onClick={() => downloadText(tableToCsv(plotTable), `${exportPrefix(result.settings.outputPrefix)}-plot.csv`)}><Download size={17} /><span>下载作图 CSV<small>当前曲线与重复模式</small></span></button>
+              <button onClick={() => downloadText(tableToCsv(rawTable), `${exportPrefix(result.settings.outputPrefix)}-raw.csv`)}><Database size={17} /><span>下载原始 CSV<small>全部循环与逐点分量</small></span></button>
             </div>
-            <button className="dataset-button" onClick={() => downloadDatasetZip(result, curve, replicateView)}>
-              <FileArchive size={19} />
-              <span>生成完整 SPR Dataset<small>Raw · Processed · Plot · Ground truth · Metadata</small></span>
-            </button>
           </section>
         </section>
       </main>

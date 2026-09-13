@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { hasStoredSession } from '../authSession'
 import './styles.css'
+import './embedded-layout.css'
 
 if (window.parent === window) {
   const workspace = new URL('../', window.location.href)

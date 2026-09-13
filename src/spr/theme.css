@@ -1,0 +1,162 @@
+@scope (.combined-shell[data-theme="light"] .spr-mode) {
+  .input-with-unit small,
+  .summary-grid small,
+  .result-heading.compact > small,
+  .export-grid small,
+  .table-note,
+  footer {
+    color: var(--wb-muted, #627570);
+  }
+}
+
+.combined-shell[data-theme="dark"] .spr-mode {
+  color: #dcebe6;
+  background: #071c19;
+  color-scheme: dark;
+}
+
+@scope (.combined-shell[data-theme="dark"] .spr-mode) {
+  .intro-panel,
+  .panel,
+  .metadata-grid > div {
+    color: #dcebe6;
+    background: #0e2924;
+    border-color: #294b43;
+  }
+
+  .intro-panel > span,
+  .result-heading > div > span,
+  .formula-strip strong {
+    color: #79dbc4;
+  }
+
+  .intro-panel p,
+  .view-toolbar p,
+  .table-note,
+  .result-heading.compact > small,
+  .summary-grid span,
+  .summary-grid small,
+  .metadata-grid span,
+  .export-grid small,
+  footer {
+    color: #a5bbb4;
+  }
+
+  .field > span,
+  .chart-controls label > span,
+  .view-toolbar label > span {
+    color: #c2d6cf;
+  }
+
+  input,
+  select,
+  textarea {
+    color: #e4f1eb;
+    background: #0a211c;
+    border-color: #39594e;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #79dbc4;
+    box-shadow: 0 0 0 3px rgb(121 219 196 / 15%);
+  }
+
+  select:disabled {
+    color: #91a69e;
+    background: #18312a;
+    border-color: #294b43;
+  }
+
+  .input-with-unit small,
+  .formula-strip,
+  .segmented {
+    color: #b7ccc3;
+    background: #15382f;
+    border-color: #39594e;
+  }
+
+  .section-title > span {
+    color: #79dbc4;
+    background: #16463a;
+  }
+
+  .ready-indicator {
+    color: #bcdbcf;
+    border-color: #39594e;
+  }
+
+  .ready-indicator svg {
+    color: #79dbc4;
+  }
+
+  .ready-indicator.pending,
+  .result-state {
+    color: #f2c697;
+    background: #382b1e;
+    border-color: #876240;
+  }
+
+  .ready-indicator.pending svg {
+    color: inherit;
+  }
+
+  .tabs,
+  .summary-grid > div,
+  .table-scroll {
+    border-color: #294b43;
+  }
+
+  .tabs button,
+  .segmented button {
+    color: #b7ccc3;
+  }
+
+  .tabs button.active {
+    color: #79dbc4;
+    border-bottom-color: #79dbc4;
+  }
+
+  .segmented button.active {
+    color: #082b22;
+    background: #79dbc4;
+  }
+
+  .chart-wrap {
+    color: #182624;
+    background: #fff;
+    color-scheme: light;
+  }
+
+  table {
+    color: #dcebe6;
+    background: #0e2924;
+  }
+
+  th,
+  td {
+    border-bottom-color: #294b43;
+  }
+
+  th {
+    color: #d5e7df;
+    background: #15382f;
+  }
+
+  .metadata-grid {
+    background: #294b43;
+  }
+
+  .export-grid button {
+    color: #dcebe6;
+    background: #102f27;
+    border-color: #39594e;
+  }
+
+  .export-grid button:hover {
+    color: #e4f1eb;
+    background: #184438;
+    border-color: #79dbc4;
+  }
+}

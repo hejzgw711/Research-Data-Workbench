@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Sun, Moon, FolderOpen, Save, Download, Shuffle, Play, Plus, Trash2, Grid3X3, FlaskConical, WandSparkles, RotateCcw, ChevronDown, Check, X, Settings2 } from 'lucide-react'
 import type { ExperimentGroup, GeneConfig, QPCRProject, SimulationResult } from './models'
 import { createDefaultProject } from './defaults'
@@ -9,7 +10,9 @@ import { AdvancedPlate } from './features/plate/AdvancedPlate'
 import { ProtocolEditor } from './features/protocol/ProtocolEditor'
 import { parseProject, serializeProject } from './features/project'
 import { downloadBlob, exportXlsx, exportCsvZip } from './features/export'
+import { dataProjectName } from './features/export/raw'
 import './features/panels.css'
+import './workbench.css'
 
 const AUTOSAVE_KEY = 'qpcr-full-flow-project-v1'
 const emptyResult: SimulationResult = { wells: [], samples: [], groups: [], comparisons: [], qc: [], totalWells: 0, plateCount: 1 }
@@ -23,6 +26,9 @@ function requiredWells(project: QPCRProject) { return project.groups.reduce((sum
 
 export default function App() {
   const [project, setProject] = useState<QPCRProject>(initialProject)
+  const embedded = window.parent !== window
+  const [hostTheme, setHostTheme] = useState<'light' | 'dark'>('light')
+  const [toolbarTarget, setToolbarTarget] = useState<HTMLElement | null>(null)
   const [tab, setTab] = useState<'groups' | 'plate'>('groups')
   const [targetId, setTargetId] = useState(project.genes.find(g => g.type === 'target')?.id ?? 'target1')
   const [toast, setToast] = useState('')
@@ -54,7 +60,18 @@ export default function App() {
   const result = calculated.result
   const targets = project.genes.filter(g => g.type === 'target')
   const activeTargetId = targets.some(g => g.id === targetId) ? targetId : targets[0]?.id ?? ''
-  useEffect(() => { document.documentElement.dataset.theme = project.theme }, [project.theme])
+  useEffect(() => {
+    if (!embedded) return
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.source !== window.parent) return
+      if (event.data?.type === 'workbench-theme' && (event.data.theme === 'light' || event.data.theme === 'dark')) setHostTheme(event.data.theme)
+    }
+    window.addEventListener('message', onMessage)
+    try { setToolbarTarget(window.parent.document.getElementById('qpcr-toolbar-slot')) } catch { /* Keep local actions when not embedded in the same-origin workbench. */ }
+    window.parent.postMessage({ type: 'qpcr-ready' }, window.location.origin)
+    return () => window.removeEventListener('message', onMessage)
+  }, [embedded])
+  useEffect(() => { document.documentElement.dataset.theme = embedded ? hostTheme : project.theme }, [embedded, hostTheme, project.theme])
   useEffect(() => {
     const timer = setTimeout(() => {
       let serialized: string
@@ -112,7 +129,8 @@ export default function App() {
     } catch (error) { notify(`无法打开项目：${error instanceof Error ? error.message : String(error)}`) }
   }
   const saveProject = () => {
-    try { downloadBlob(serializeProject(project), `${project.name.replace(/[<>:"/\\|?*]/g, '_')}.qpcr.json`, 'application/json'); notify('项目已保存，包含参数、种子及逐孔微调') }
+    const name = dataProjectName(project)
+    try { downloadBlob(serializeProject({ ...project, name }), `${name.replace(/[<>:"/\\|?*]/g, '_')}.qpcr.json`, 'application/json'); notify('项目已保存，包含参数、种子及逐孔微调') }
     catch (error) { notify(String(error)) }
   }
   const exportData = async (format: 'xlsx' | 'csv') => {
@@ -127,15 +145,19 @@ export default function App() {
   })
   const groupSelection = (value: string, onChange: (id: string) => void, label: string) => <select value={project.groups.some(g => g.id === value) ? value : project.groups[0].id} aria-label={label} onChange={e => onChange(e.target.value)}>{project.groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select>
 
-  return <div className="app-shell">
-    <header className="app-header"><div className="brand"><div><div className="eyebrow">qRT-PCR DATA STUDIO</div><h1>qRT-PCR 分组模拟工作台</h1><p className="brand-caption">分组 qRT-PCR 合成项目 · 测量链模拟 · 浏览器本地计算</p></div></div>
-      <div className="toolbar-actions">
+  const toolbar = <div className={`toolbar-actions${toolbarTarget ? ' qpcr-global-actions' : ''}`} aria-label="qPCR 全局操作">
+        <button className="btn btn-reset" title="新建实验，恢复默认设置" onClick={() => setResetConfirm(true)}><RotateCcw size={15}/>新建实验</button>
         <button className="btn" onClick={() => openRef.current?.click()}><FolderOpen size={15}/>打开</button><button className="btn" onClick={saveProject}><Save size={15}/>保存</button>
         <button className="btn btn-primary" onClick={() => { update(p => { p.randomSeed = newSeed() }); notify(project.inputMode === 'manual' ? '曲线随机种子已更新；手填 Cq 保持不变' : '已更换随机种子并生成新一批模拟数据') }}><Shuffle size={16}/>换一批数据</button>
         <button className="btn" onClick={() => { setProject(p => ({ ...p })); notify('已按当前种子重新模拟，相同参数的结果可复现') }} title="按当前种子重新生成"><Play size={15}/>模拟</button>
-        <div className="theme-switch" aria-label="外观"><button aria-label="浅色主题" className={project.theme === 'light' ? 'active' : ''} onClick={() => update(p => { p.theme = 'light' })}><Sun size={14}/>白色</button><button aria-label="深色主题" className={project.theme === 'dark' ? 'active' : ''} onClick={() => update(p => { p.theme = 'dark' })}><Moon size={14}/>黑色</button></div>
+        {!embedded && <button className="btn theme-icon" aria-label={project.theme === 'light' ? '切换为深色主题' : '切换为浅色主题'} title={project.theme === 'light' ? '切换为深色主题' : '切换为浅色主题'} onClick={() => update(p => { p.theme = p.theme === 'light' ? 'dark' : 'light' })}>{project.theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}</button>}
         <button className="btn btn-export" title="下载 ZIP：分析工作簿＋逐板模拟原始数据工作簿" disabled={busy || !!calculated.error} onClick={() => exportData('xlsx')}><Download size={15}/>{busy ? '导出中…' : 'XLSX＋原始数据'}</button><button className="btn" title="包含分析表和逐板模拟原始数据 CSV" disabled={busy || !!calculated.error} onClick={() => exportData('csv')}><Download size={14}/>CSV ZIP</button>
-      </div>
+    </div>
+
+  return <div className={`app-shell${toolbarTarget ? ' with-host-toolbar' : ''}`}>
+    {toolbarTarget && createPortal(toolbar, toolbarTarget)}
+    <header className="app-header"><div className="brand"><div><div className="eyebrow">qRT-PCR DATA STUDIO</div><h1>qRT-PCR 分组模拟工作台</h1><p className="brand-caption">分组 qRT-PCR 合成项目 · 测量链模拟 · 浏览器本地计算</p></div></div>
+      {!toolbarTarget && toolbar}
       <input ref={openRef} type="file" accept=".json,.qpcr" hidden aria-label="打开项目文件" onChange={e => { const file = e.target.files?.[0]; if (file) void openProject(file); e.target.value = '' }}/>
     <section className="project-toolbar" aria-label="项目工具栏">
       <label className="field project-name"><span>项目名称</span><input aria-label="项目名称" value={project.name} maxLength={100} onChange={e => update(p => { p.name = e.target.value })}/></label>
@@ -187,7 +209,7 @@ export default function App() {
       </section>
       <ProtocolEditor project={project} update={update}/>
     </div><ResultsPanel project={project} result={result} geneId={activeTargetId} onGeneChange={setTargetId} notify={notify}/></div></main> : <main><AdvancedPlate project={project} result={result} update={update} notify={notify}/></main>}
-    <footer><span><Check size={13}/> {autosaveLabel} · 模拟数据仅用于教学与测试</span><div><span>qRT-PCR Data Studio · 工作台集成版</span><button className="text-button" onClick={() => setResetConfirm(true)}>新建实验</button></div></footer>
+    <footer><span><Check size={13}/> {autosaveLabel} · 模拟数据仅用于教学与测试</span><div><span>qRT-PCR Data Studio · 工作台集成版</span></div></footer>
     {toast && <div className="toast" role="status"><span>{toast}</span><button className="icon-button" onClick={() => setToast('')} aria-label="关闭提示"><X size={15}/></button></div>}
     {resetConfirm && <div className="modal-backdrop"><div className="modal" role="dialog" aria-modal="true" aria-labelledby="reset-title"><h2 id="reset-title">新建实验？</h2><p>将替换当前浏览器中的实验。需要保留时，请先保存项目文件。</p><div className="modal-actions"><button className="btn" onClick={() => setResetConfirm(false)}>取消</button><button className="btn" onClick={saveProject}>先保存项目</button><button className="btn btn-primary" onClick={() => { setProject(createDefaultProject()); setTargetId('target1'); setTab('groups'); setResetConfirm(false); notify('已创建默认实验') }}>新建</button></div></div></div>}
   </div>

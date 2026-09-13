@@ -6,7 +6,9 @@ export function saveBlob(blob: Blob, name: string) {
 }
 
 export async function exportSvgElement(svg: SVGSVGElement, name: string, format: 'svg' | 'png') {
-  const xml = new XMLSerializer().serializeToString(svg)
+  const exported = svg.cloneNode(true) as SVGSVGElement
+  exported.querySelectorAll('[data-export-omit]').forEach(element => element.remove())
+  const xml = new XMLSerializer().serializeToString(exported)
   const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' })
   if (format === 'svg') { saveBlob(blob, `${name}.svg`); return }
   const url = URL.createObjectURL(blob)

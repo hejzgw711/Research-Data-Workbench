@@ -1,0 +1,12 @@
+/* The workbench owns vertical scrolling; tables retain their local scroll. */
+:root { overflow: hidden; }
+:root body { min-width: 320px; }
+:root #root { display: flow-root; }
+:root .app-shell { min-height: 0; }
+:root :is(button, input, select, textarea) { scroll-margin-top: 90px; }
+
+/* Fixed child overlays use the visible parent viewport, not the tall iframe. */
+:root .modal-backdrop { top: var(--host-view-top, 0px); bottom: auto; height: var(--host-view-height, 100vh); padding: 16px; grid-template-columns: minmax(0, 1fr); }
+:root .modal { width: min(490px, 100%); min-width: 0; max-height: 100%; overflow-y: auto; }
+:root .modal-actions { flex-wrap: wrap; }
+:root .toast { top: calc(var(--host-view-bottom, 100vh) - 20px); bottom: auto; transform: translate(-50%, -100%); width: max-content; max-width: min(680px, calc(100% - 32px)); }

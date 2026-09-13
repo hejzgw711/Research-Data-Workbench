@@ -20,6 +20,14 @@ const curveLabels: Record<CurveKey, string> = {
 
 const numberCell = (value: number) => Number(value.toFixed(6))
 
+export function exportPrefix(value: string): string {
+  return !value || value === 'spr-synthetic' ? 'spr-data' : value
+}
+
+function exportExperimentName(value: string): string {
+  return value === 'SPR Synthetic Run' ? 'SPR Run' : value
+}
+
 function standardDeviation(values: number[]): number {
   if (values.length < 2) return 0
   const mean = values.reduce((sum, value) => sum + value, 0) / values.length
@@ -135,8 +143,8 @@ const rawHeaders = [
 
 function rawRow(result: SimulationResult, point: DataPoint): Array<string | number> {
   return [
-    result.settings.outputPrefix,
-    result.settings.experimentName,
+    exportPrefix(result.settings.outputPrefix),
+    exportExperimentName(result.settings.experimentName),
     point.cycleId,
     point.cycleKind,
     point.replicate,
@@ -201,9 +209,8 @@ export function downloadText(text: string, filename: string, type = 'text/csv;ch
 
 export function experimentMetadata(result: SimulationResult) {
   return {
-    synthetic: true,
     generator: '生成可分析科研数据工作台',
-    simulatorVersion: '0.1.0',
+    version: '0.1.0',
     createdAt: result.createdAt,
     seed: result.settings.seed,
     kinetics: {
@@ -213,7 +220,12 @@ export function experimentMetadata(result: SimulationResult) {
       KD_M: result.kdM,
       Rmax_RU: result.settings.rmaxRU,
     },
-    settings: result.settings,
+    settings: {
+      ...result.settings,
+      outputPrefix: exportPrefix(result.settings.outputPrefix),
+      experimentName: exportExperimentName(result.settings.experimentName),
+      sampleName: result.settings.sampleName === 'Synthetic-1' ? 'Sample-1' : result.settings.sampleName,
+    },
     concentrations_M: result.concentrationsM,
     cycles: result.cycles.map((cycle) => cycle.plan),
   }
@@ -225,7 +237,7 @@ export async function downloadDatasetZip(
   replicateView: ReplicateView,
 ): Promise<void> {
   const zip = new JSZip()
-  const prefix = result.settings.outputPrefix || 'spr-synthetic'
+  const prefix = exportPrefix(result.settings.outputPrefix)
   const plotWide = buildPlotTable(result, curve, replicateView)
   const plotLong = buildLongPlotTable(result, curve)
   const raw = buildRawTable(result)
@@ -270,8 +282,9 @@ export async function downloadDatasetZip(
     'README.txt',
     [
       '生成可分析科研数据工作台',
-      'Synthetic data only. For research teaching and method testing.',
+      'SPR dataset: 1:1 Langmuir response with reference-channel processing.',
       `Seed: ${result.settings.seed}`,
+      'Units: time = seconds; response = RU; concentration = M unless otherwise specified.',
       'Association injection starts at time_injection_aligned_s = 0.',
     ].join('\r\n'),
   )

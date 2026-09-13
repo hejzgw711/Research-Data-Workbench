@@ -1,0 +1,77 @@
+/* Light presentation for the existing WB and statistical tools. Data and export
+   renderers retain their own values and styles; the dark theme stays unchanged. */
+.combined-shell[data-theme="light"] :is(.wb-stage, .stat-stage) > .app {
+  --bg: var(--wb-bg);
+  --surface: var(--wb-card);
+  --surface-2: var(--wb-soft);
+  --surface-3: #e6f1ed;
+  --border: var(--wb-border);
+  --text: var(--wb-text);
+  --muted: var(--wb-muted);
+  --accent: var(--wb-accent);
+  --accent-dark: #207965;
+  --warm: #ae6338;
+  --danger: #b23c3c;
+}
+
+@scope (.combined-shell[data-theme="light"] :is(.wb-stage, .stat-stage)) {
+  .app .panel { border-color: var(--border); background: var(--surface); box-shadow: none; }
+  .app :is(input, select) { color: var(--text); background: #fff; }
+  .app :is(input, select):disabled { color: #758780; background: #eaf0ed; }
+  .app input::placeholder { color: #758780; }
+  .app .field small { color: var(--muted); }
+  .app :is(.button.primary, .step, .lane-index, .tool-button.active,
+    .mode-switch button.active, .segmented button.active, .toast) { color: #fff; }
+  .app :is(.button.reset, .reset-tool, .independent-badge, .lock-toggle.locked) {
+    color: #8a4d24;
+    border-color: #d7b18f;
+    background: #fbf0e6;
+  }
+  .app :is(.button.reset, .reset-tool):hover { color: #793e19; background: #f6e4d4; }
+  .app :is(.tool-button.background-tool.active, .rotate-tool.active) {
+    color: #482611;
+    background: #eccaaa;
+    border-color: #ca966a;
+  }
+  .app .button.warm { color: #fff; border-color: var(--warm); }
+  .app :is(.warning-banner, .result-state.pending) {
+    color: #835027;
+    border-color: #dfc5a9;
+    background: #fff5e9;
+  }
+  .app .warning-banner span { color: #795a3d; }
+  .app .dirty { color: #93561e; }
+  .app :is(.stat-card, .raw-card, .checks-card, .pairwise-card) > header {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .app :is(th, td) { border-color: var(--border); }
+  .app th,
+  .app :is(.two-way-grid, .ts-cell-grid) thead th {
+    color: var(--muted);
+    background: var(--surface-2);
+  }
+  .app :is(.two-way-grid, .ts-cell-grid) thead th { color: var(--accent); }
+  .app :is(.two-way-grid, .ts-cell-grid) tbody > th,
+  .app .two-way-raw-table tbody th { color: var(--text); background: #eaf2ee; }
+  .app .status.pass { color: #196945; background: #e3f2e9; }
+  .app .status.fail { color: #a33131; background: #f9e5e5; }
+  .app .check-row.pass > svg { color: #24734d; }
+  .app .check-row.warn > svg { color: #98631f; }
+  .app .check-row.fail > svg { color: var(--danger); }
+}
+
+@scope (.combined-shell[data-theme="light"] .wb-stage) {
+  .app :is(.drop-zone, .image-block) { background: var(--surface); }
+  .app .drop-zone:hover, .app .drop-zone.dragging { background: #eaf5f0; }
+  .app .canvas-shell { background: #e5eeea; }
+  .app .canvas-help { color: #29443a; background: rgba(249, 252, 250, .94); }
+  .app .result-table th { color: var(--muted); background: var(--surface-2); }
+  .app .result-table :is(th, td) { border-color: var(--border); }
+}
+
+/* Like the other tools, the scientific plot stays on white in either UI theme. */
+.combined-shell .wb-stage .group-chart-title { padding: 16px 18px 0; border: 1px solid var(--border); border-bottom: 0; border-radius: 8px 8px 0 0; color: #263936; background: #fff; font-size: 13px; font-weight: 600; }
+.combined-shell .wb-stage .group-chart-scroll { min-width: 0; overflow-x: auto; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 8px 8px; background: #fff; color-scheme: light; }
+.combined-shell .wb-stage .group-svg { display: block; width: 100%; height: auto; border: 0; border-radius: 0; background: #fff; }
+.combined-shell .wb-stage .group-chart-footer { padding: 8px 0; gap: 6px 12px; font-size: 13px; }

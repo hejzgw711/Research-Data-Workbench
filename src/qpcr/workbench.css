@@ -1,0 +1,180 @@
+/* Workbench presentation only. The standalone simulator and calculation/export code stay unchanged. */
+:root:not([data-theme="dark"]) {
+  --bg: #edf3f1;
+  --card: #ffffff;
+  --soft: #f4f7f6;
+  --input: #ffffff;
+  --text: #1f302d;
+  --muted: #687775;
+  --border: #dbe5e2;
+  --accent: #177f6b;
+  --accent-soft: #eef8f5;
+  --primary: #177f6b;
+  --primary-ink: #ffffff;
+  --shadow: none;
+}
+:root[data-theme="dark"] {
+  --bg: #071817;
+  --card: #092522;
+  --soft: #0d302c;
+  --input: #0d302c;
+  --text: #e6efee;
+  --muted: #99b4ae;
+  --border: #1b4c46;
+  --accent: #62d3c2;
+  --accent-soft: #0d302c;
+  --primary: #62d3c2;
+  --primary-ink: #062a25;
+  --shadow: none;
+}
+
+:root body { min-width: 320px; font-size: 14px; line-height: 1.5; }
+:root .app-shell { max-width: 1780px; padding: 26px 26px 12px; background: none; }
+:root .app-shell .app-header {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+:root .app-shell .brand { grid-column: 1 / -1; grid-row: 1; }
+:root .app-shell .brand > div { display: block; }
+:root .app-shell .brand h1 { font-size: 20px; letter-spacing: 0; }
+:root .app-shell .eyebrow { display: block; font-size: 11px; letter-spacing: 1.2px; }
+:root .brand-caption { margin-top: 5px; font-size: 12px; line-height: 1.6; }
+:root .app-shell .project-toolbar {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--border);
+}
+:root .app-shell .toolbar-actions { grid-column: 1 / -1; grid-row: 3; justify-content: flex-start; gap: 8px; }
+:root .toolbar-actions .theme-icon { width: 38px; min-width: 38px; padding: 0; justify-content: center; }
+:root .app-shell .project-name { min-width: 210px; }
+:root .app-shell .seed-input { width: 160px; }
+:root .app-shell .synthetic-badge { display: inline-block; border-radius: 6px; font-size: 12px; }
+:root .experiment-count { min-width: 85px; }
+:root .experiment-count span { font-size: 12px; }
+
+:root .card { padding: 20px; border-radius: 8px; box-shadow: none; }
+:root .workspace { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 22px; }
+:root .configuration-column, :root .results-column { gap: 18px; }
+:root .section-heading { margin-bottom: 18px; }
+:root .section-heading > div { min-width: 0; }
+:root .section-number { width: 28px; height: 28px; border-radius: 6px; color: var(--accent); background: var(--accent-soft); }
+:root h2 { font-size: 16px; font-weight: 650; }
+:root .section-description { font-size: 13px; }
+:root .main-tabs { padding-top: 14px; margin-bottom: 18px; }
+:root .main-tabs button { min-height: 42px; }
+:root .main-tabs button.active { border-bottom-color: var(--accent); }
+:root .generation-card { margin-bottom: 18px; }
+:root .generation-title { flex-wrap: wrap; gap: 6px 12px; }
+:root .generation-title .small, :root .line-label, :root .model-note { font-size: 12px; }
+:root .control-line { gap: 10px; margin-bottom: 12px; }
+:root .model-note strong { background: var(--soft); }
+
+:root input:not([type="checkbox"]):not([type="radio"]), :root select, :root textarea {
+  border-radius: 6px;
+  font-size: 14px;
+}
+:root input:not([type="checkbox"]):not([type="radio"]), :root select { min-height: 40px; }
+:root .field > span:not(.numeric-field), :root .editor-table th { font-size: 13px; }
+:root .btn { min-height: 38px; border-radius: 6px; padding: 8px 12px; font-size: 14px; background: var(--card); }
+:root .btn-primary, :root .btn-export { color: var(--primary-ink); border-color: var(--primary); background: var(--primary); }
+:root .btn.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+:root .btn-small { min-height: 34px; padding: 6px 9px; font-size: 13px; }
+:root .theme-switch, :root .segmented { border-radius: 6px; }
+:root .theme-switch button, :root .segmented button { min-height: 32px; font-size: 13px; }
+:root .theme-switch button.active, :root .segmented button.active { background: var(--primary); color: var(--primary-ink); }
+:root .icon-button { min-height: 30px; min-width: 28px; }
+:root .design-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+:root .design-option { padding: 12px; border-radius: 6px; }
+:root .design-option strong { font-size: 14px; }
+:root .design-option small, :root .design-option span { font-size: 12px; }
+:root .design-summary { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px 16px; border-radius: 6px; }
+:root .design-summary strong, :root .design-summary span { font-size: 12px; }
+:root .design-summary br { display: none; }
+:root .group-table { min-width: 590px; }
+:root .editor-table input, :root .editor-table select { font-size: 14px; }
+:root .section-foot { font-size: 12px; line-height: 1.6; }
+:root .gene-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+:root .gene-card { padding: 14px; border-radius: 6px; }
+:root .gene-header, :root .gene-card .field > span { font-size: 12px; }
+:root .gene-card .field input { min-height: 38px; font-size: 14px; }
+:root .fold-table tbody th { font-size: 13px; }
+:root .gene-tabs button, :root .comparison-tag, :root .inline-field { font-size: 13px; }
+:root .sd-control:has(.numeric-field) select { width: 84px; font-size: 12px; }
+:root .actual-summary strong { font-size: 14px; }
+:root .actual-summary span, :root .comparison-toggle small { font-size: 12px; }
+:root .control-tag { font-size: 11px; }
+
+:root .result-card .result-heading-text p { font-size: 13px; }
+:root .result-card .result-topline select { min-height: 36px; font-size: 14px; }
+:root .result-card .expression-chart { display: flex; justify-content: flex-start; border: 1px solid var(--border); border-radius: 6px; }
+/* Use the measured panel width; long group sets retain readable, scrollable spacing. */
+:root .expression-chart > svg { flex: none; max-width: none; margin-inline: auto; }
+:root .result-card .result-normalization, :root .result-card .result-warning { font-size: 12px; }
+:root .result-card .result-data-panel, :root .result-card .result-qc-panel { border-radius: 6px; }
+:root .result-card .table-heading { padding: 14px 12px; gap: 10px; }
+:root .result-card .result-table-title h3 { font-size: 15px; }
+:root .result-card .result-table-title > span, :root .result-card .result-integrity { font-size: 12px; }
+:root .result-card .result-data-actions { flex-wrap: wrap; }
+:root .result-card .result-data-actions .btn, :root .result-card .result-table-tabs button { min-height: 34px; font-size: 12px; }
+:root .result-card .results-table, :root .result-card .results-table thead th { font-size: 13px; }
+:root .result-card .results-table th, :root .result-card .results-table td { padding: 9px 10px; }
+:root .result-card .result-data-note, :root .result-card .result-qc-heading,
+:root .result-card .result-qc-row > strong, :root .result-card .result-qc-row dl,
+:root .result-card .result-qc-panel .qc-success, :root .result-card .result-qc-panel .qc-findings p,
+:root .result-card .result-qc-panel .text-button, :root .result-card .result-qc-note,
+:root .result-card .statistics-list > div, :root .result-card .statistics-list .mono,
+:root .result-card .result-test-note { font-size: 12px; }
+:root .result-card .result-qc-row { grid-template-columns: 90px minmax(0, 1fr); }
+:root .result-card .result-qc-row dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+:root .protocol-preview { border-radius: 6px; background: #f4f7f6; }
+:root .protocol-template, :root .protocol-stage, :root .protocol-step,
+:root .protocol-mode, :root .protocol-detection, :root .plate-controls, :root .plate-curves { border-radius: 6px; }
+:root .protocol-template { flex-wrap: wrap; }
+:root .protocol-editor .field > span:not(.numeric-field), :root .protocol-stage-title small,
+:root .protocol-metadata-note, :root .plate-state-legend, :root .selected-well-heading,
+:root .selected-well-heading > label, :root .well-action-buttons > span { font-size: 12px; }
+:root .protocol-editor input:not([type="checkbox"]), :root .protocol-editor select,
+:root .well-adjustments input, :root .plate-controls select { min-height: 36px; font-size: 13px; }
+:root .protocol-editor .protocol-channel { width: 125px; }
+:root .well-adjustments span { font-size: 12px; }
+:root .plate-workspace { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 22px; }
+:root footer { padding: 26px 2px 32px; font-size: 13px; }
+:root footer .text-button { font-size: 13px; }
+
+@media (min-width: 1450px) {
+  :root .app-shell .app-header { grid-template-columns: minmax(300px, 1fr) auto; }
+  :root .app-shell .brand { grid-column: 1; }
+  :root .app-shell .toolbar-actions { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+}
+@media (max-width: 1250px) {
+  :root .workspace, :root .plate-workspace { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  :root .app-shell { padding: 14px; }
+  :root .card, :root .app-shell .app-header { padding: 16px; }
+  :root .app-shell .project-name { min-width: 100%; }
+  :root .app-shell .project-toolbar { gap: 12px; }
+  :root .app-shell .toolbar-actions { gap: 7px; }
+  :root .toolbar-actions .btn { padding: 7px 9px; font-size: 13px; }
+  :root .design-options { grid-template-columns: minmax(0, 1fr); }
+  :root .design-summary { align-items: flex-start; flex-direction: column; }
+  :root .gene-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  :root .gene-card { padding: 10px; }
+  :root .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root .main-tabs { flex-wrap: wrap; }
+  :root .result-card .result-data-actions { width: 100%; justify-content: flex-start; }
+  :root .result-card .result-qc-row { grid-template-columns: minmax(0, 1fr); }
+  :root .well-adjustments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root .selected-well-heading, :root .plate-export-controls { flex-wrap: wrap; }
+  :root .protocol-stage-title { flex-wrap: wrap; }
+  :root .protocol-stage-title .protocol-cycle-label { margin-left: 0; }
+  :root .protocol-stage-title .protocol-enable { margin-left: 0; }
+  :root footer { align-items: flex-start; flex-direction: column; }
+}

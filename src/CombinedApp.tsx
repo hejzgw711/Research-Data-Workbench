@@ -4,6 +4,7 @@ import { WbApp } from './App'
 import SprApp from './spr/App'
 import StatApp from './stat/App'
 import { QpcrStage } from './QpcrStage'
+import { WorkbenchThemeContext, WORKBENCH_THEME_KEY, type WorkbenchTheme } from './WorkbenchHeader'
 
 type Mode = 'wb' | 'spr' | 'stat' | 'qpcr'
 
@@ -27,6 +28,13 @@ function ModeSwitcher({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) =
 }
 
 export default function CombinedApp({ onLogout }: { onLogout: () => void }) {
+  const [theme, setTheme] = useState<WorkbenchTheme>(() => {
+    try { return localStorage.getItem(WORKBENCH_THEME_KEY) === 'dark' ? 'dark' : 'light' } catch { return 'light' }
+  })
+  const toggleTheme = () => setTheme(current => current === 'light' ? 'dark' : 'light')
+  useEffect(() => {
+    try { localStorage.setItem(WORKBENCH_THEME_KEY, theme) } catch { /* Theme still works when storage is unavailable. */ }
+  }, [theme])
   const [mode, setMode] = useState<Mode>(() => window.location.hash === '#qpcr' ? 'qpcr' : 'wb')
   const [visited, setVisited] = useState<Mode[]>([mode])
   const changeMode = (next: Mode) => {
@@ -40,13 +48,13 @@ export default function CombinedApp({ onLogout }: { onLogout: () => void }) {
   }, [mode])
   const navigation = <ModeSwitcher mode={mode} onChange={changeMode} />
   return (
-    <div className={`combined-shell ${mode}-mode-active`}>
+    <WorkbenchThemeContext.Provider value={{ theme, toggleTheme }}><div className={`combined-shell ${mode}-mode-active`} data-theme={theme}>
       <div className="mode-content">
         <div className={`wb-stage ${mode === 'wb' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'wb'}><WbApp active={mode === 'wb'} onLogout={onLogout} navigation={navigation} /></div>
         {visited.includes('stat') && <div className={`stat-stage ${mode === 'stat' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'stat'}><StatApp onLogout={onLogout} navigation={navigation} /></div>}
         {visited.includes('qpcr') && <div className={`qpcr-stage ${mode === 'qpcr' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'qpcr'}><QpcrStage active={mode === 'qpcr'} onLogout={onLogout} navigation={navigation} /></div>}
         {visited.includes('spr') && <div className={`spr-stage ${mode === 'spr' ? 'is-visible' : 'is-hidden'}`} aria-hidden={mode !== 'spr'}><SprApp onLogout={onLogout} navigation={navigation} /></div>}
       </div>
-    </div>
+    </div></WorkbenchThemeContext.Provider>
   )
 }
