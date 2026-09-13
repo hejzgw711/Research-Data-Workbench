@@ -34,7 +34,7 @@ Windows 也可双击 `启动本地预览.cmd`，自动启动并打开网页。�
 
 验证命令：`pnpm test`、`pnpm build`、`pnpm test:e2e`。覆盖计算、导出、统一工具栏、主题与窄屏布局；浏览器测试首次运行需 `pnpm exec playwright install chromium`。
 
-生产子目录和线上验收：`node scripts/check-pages.mjs https://hejzgw711.github.io/Research-Data-Workbench/`。旧地址也可用相同命令验收。该检查在隔离浏览器中验证原有前端会话协议、四个入口、qPCR 资源及原始工作簿下载，不修改真实用户的浏览器数据。
+生产子目录和线上验收：`node scripts/check-pages.mjs https://hejzgw711.github.io/Research-Data-Workbench/`。该检查仅针对正常运行的新主站，在隔离浏览器中验证原有前端会话协议、四个入口、qPCR 资源及原始工作簿下载，不修改真实用户的浏览器数据。
 
 qPCR 代码在 `src/qpcr/`，`qpcr/index.html` 与根页面由一次 Vite 构建产出，原 GitHub Pages 流程不变。qPCR 的嵌入登录检查在独立 `main.tsx`，计算与导出模块沿用已经验证的独立版本。不要将个人参考 XLS、自动保存记录或运行时目录复制到发布仓库。
 
@@ -42,8 +42,8 @@ qPCR 代码在 `src/qpcr/`，`qpcr/index.html` 与根页面由一次 Vite 构建
 
 主要在线地址：https://hejzgw711.github.io/Research-Data-Workbench/
 
-原地址 https://hejzgw711.github.io/wb-gray-studio/ 保留并同步本次发布，原来的分享链接仍可使用。两个地址使用相同源码和相对资源路径，账号密码不变。同一浏览器中两者属于同源，因此共用已有的登录、主题和 qPCR 本地保存记录。
+旧地址 https://hejzgw711.github.io/wb-gray-studio/ 和 https://hejzgw711.github.io/synthetic-stat-studio/ 暂停工具服务，入口显示“ny正在迭代牛逼功能，敬请期待”。旧仓库源码及历史保留，Pages 只发布静态维护页面，不发布工具脚本；不会清除用户浏览器中的项目或登录记录。
 
-本地 `origin` 对应旧仓库 `hejzgw711/wb-gray-studio`，`workbench` 对应新仓库 `hejzgw711/Research-Data-Workbench`。后续经用户确认发布时，将同一提交推送到两个仓库的 `main`，并分别验收两个 Pages 地址；未要求上线的修改仅保留在本地。
+本地 `origin` 对应新主站仓库 `hejzgw711/Research-Data-Workbench`，`legacy-wb` 对应旧仓库 `hejzgw711/wb-gray-studio`。后续经用户确认发布时仅推送 `origin/main`；不要再把主站源码同步推送到旧站，否则可能意外恢复已暂停的工具。未要求上线的修改仅保留在本地。
 
-原独立数据反推站点 https://hejzgw711.github.io/synthetic-stat-studio/ 保持不变；本仓库的发布只更新合并工作台。
+恢复旧站需要用户明确要求，再还原对应仓库的维护提交并重新发布。三个路径仍属于同一 GitHub Pages 来源，主站继续沿用原账号密码以及已有的浏览器本地存储。

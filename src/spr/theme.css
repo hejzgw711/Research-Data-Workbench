@@ -11,7 +11,7 @@
 
 .combined-shell[data-theme="dark"] .spr-mode {
   color: #dcebe6;
-  background: #071c19;
+  background: var(--wb-bg, #071817);
   color-scheme: dark;
 }
 

@@ -99,7 +99,7 @@ button {
 }
 
 .workspace {
-  max-width: 1780px;
+  max-width: none;
   margin: 0 auto;
   padding: 26px;
   display: grid;
@@ -634,9 +634,9 @@ td:first-child {
 }
 
 footer {
-  max-width: 1780px;
+  max-width: none;
   margin: 0 auto;
-  padding: 22px 28px 54px;
+  padding: 22px 26px 54px;
   display: flex;
   justify-content: space-between;
   gap: 18px;
@@ -682,7 +682,7 @@ footer {
   }
 
   .workspace {
-    padding: 14px;
+    padding: 14px 16px;
   }
 
   .parameter-grid,

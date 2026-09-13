@@ -54,14 +54,15 @@ test('wheel over qPCR scrolls the document, scrolls the header away, and pins th
   await page.screenshot({ path: 'test-results/qpcr-layout-scrolled.png' })
 })
 
-test('qPCR uses the centered workbench width and aligns configuration and preview cards', async ({ page }) => {
+test('qPCR uses the full workbench width and aligns configuration and preview cards', async ({ page }) => {
   await page.setViewportSize({ width: 2200, height: 1200 })
   const qpcr = await openQpcr(page)
   const shell = (await qpcr.locator('.app-shell').boundingBox())!
-  expect(shell.width).toBeLessThanOrEqual(1780)
-  expect(shell.width).toBeGreaterThan(1700)
+  expect(shell.width).toBe(page.viewportSize()!.width)
   expect(Math.abs(shell.x + shell.width / 2 - page.viewportSize()!.width / 2)).toBeLessThanOrEqual(2)
   const generation = (await qpcr.locator('.generation-card').boundingBox())!
+  expect(generation.x).toBe(26)
+  expect(generation.width).toBe(page.viewportSize()!.width - 52)
   const configuration = (await qpcr.locator('.configuration-column').boundingBox())!
   const results = (await qpcr.locator('.results-column').boundingBox())!
   expect(Math.abs(configuration.x - generation.x)).toBeLessThanOrEqual(1)

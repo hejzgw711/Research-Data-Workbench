@@ -1,6 +1,6 @@
 .qpcr-host { min-height: 100vh; color: var(--wb-text); background: var(--wb-bg); }
 .qpcr-tool-frame { display: block; width: 100%; height: 900px; border: 0; background: var(--wb-bg); }
-.qpcr-loading { margin: 0 auto; max-width: 1780px; padding: 20px 26px; color: var(--wb-muted); font-size: .875rem; }
+.qpcr-loading { margin: 0 auto; padding: 20px 26px; color: var(--wb-muted); font-size: .875rem; }
 @media (max-width: 760px) {
   .qpcr-loading { padding-inline: 16px; }
 }

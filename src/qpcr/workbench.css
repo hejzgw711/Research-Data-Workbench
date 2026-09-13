@@ -29,7 +29,7 @@
 }
 
 :root body { min-width: 320px; font-size: 14px; line-height: 1.5; }
-:root .app-shell { max-width: 1780px; padding: 26px 26px 12px; background: none; }
+:root .app-shell { max-width: none; padding: 26px 26px 12px; background: none; }
 :root .app-shell .app-header {
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
@@ -157,7 +157,7 @@
   :root .workspace, :root .plate-workspace { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 760px) {
-  :root .app-shell { padding: 14px; }
+  :root .app-shell { padding: 14px 16px; }
   :root .card, :root .app-shell .app-header { padding: 16px; }
   :root .app-shell .project-name { min-width: 100%; }
   :root .app-shell .project-toolbar { gap: 12px; }

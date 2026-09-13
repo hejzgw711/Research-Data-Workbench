@@ -1,4 +1,4 @@
-.combined-shell {
+.combined-shell[data-theme] {
   --wb-bg: #edf3f1;
   --wb-card: #fff;
   --wb-soft: #f4f7f6;
@@ -12,6 +12,8 @@
   color: var(--wb-text);
   background: var(--wb-bg);
   color-scheme: light;
+  width: 100%;
+  min-width: 0;
 }
 .combined-shell[data-theme="dark"] {
   --wb-bg: #071817;
@@ -27,7 +29,7 @@
   color-scheme: dark;
 }
 .combined-shell :is(.wb-stage, .stat-stage) > .app {
-  max-width: 1780px;
+  max-width: none;
   margin: auto;
   padding: 18px 26px 12px;
   background: var(--wb-bg);
@@ -48,7 +50,7 @@
 }
 .combined-shell :is(.qpcr-host, .spr-mode) > .workbench-header {
   width: calc(100% - 52px);
-  max-width: 1728px;
+  max-width: none;
   margin: 18px auto 0;
 }
 .combined-shell :is(.qpcr-host, .spr-mode) { display: flow-root; background: var(--wb-bg); }
@@ -86,7 +88,7 @@
 .combined-shell .workbench-header button:is(.reset, .btn-reset) { color: var(--wb-warm); background: var(--wb-warm-bg); border-color: color-mix(in srgb, var(--wb-warm) 45%, var(--wb-border)); }
 .combined-shell .workbench-header .workbench-theme-toggle { width: 36px; height: 36px; min-width: 36px; padding: 0; color: var(--wb-accent); }
 .combined-shell[data-theme] .combined-switcher { margin: 12px 0 0; padding: 10px 0; border-color: var(--wb-border); background: var(--wb-bg); }
-.combined-shell[data-theme] :is(.qpcr-host, .spr-mode) > .combined-switcher { padding: 10px max(26px, calc((100% - 1728px) / 2)); }
+.combined-shell[data-theme] :is(.qpcr-host, .spr-mode) > .combined-switcher { padding: 10px 26px; }
 .combined-shell[data-theme] .combined-switcher button { color: var(--wb-muted); border-color: var(--wb-border); background: var(--wb-card); }
 .combined-shell[data-theme] .combined-switcher button:hover { color: var(--wb-accent); border-color: var(--wb-accent); }
 .combined-shell[data-theme] .combined-switcher button.active { color: var(--wb-accent-ink); background: var(--wb-accent); border-color: var(--wb-accent); }
